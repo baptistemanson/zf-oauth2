@@ -1,11 +1,12 @@
 <?php
 
 return array(
-    'zf-oauth2' => array
+    'zf-oauth2' => array(
         'storage' => 'ZF\OAuth2\Adapter\DoctrineAdapter',
         'storage_settings' => array(
             # datatype is provided as a convienicne to help create the ERD
             'object_manager' => 'doctrine.entitymanager.orm_default',
+            'bcrypt_cost' => 14, # match zfcuser
             'mapping' => array(
                 'ZF\OAuth2\Mapper\User' => array(
                     'entity' => 'ZF\OAuth2\Entity\User',
@@ -72,20 +73,24 @@ return array(
                         'access_token' => array(
                             'type' => 'field',
                             'name' => 'accessToken',
+                            'datatype' => 'string',
                         ),
                         'expires' => array(
                             'type' => 'field',
                             'name' => 'expires',
+                            'datatype' => 'datetime',
                         ),
                         'scope' => array(
                             'type' => 'field',
                             'name' => 'scope',
+                            'datatype' => 'text',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
@@ -96,20 +101,24 @@ return array(
                         'refresh_token' => array(
                             'type' => 'field',
                             'name' => 'refreshToken',
+                            'datatype' => 'string',
                         ),
                         'expires' => array(
                             'type' => 'field',
                             'name' => 'expires',
+                            'datatype' => 'datetime',
                         ),
                         'scope' => array(
                             'type' => 'field',
                             'name' => 'scope',
+                            'datatype' => 'text',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
@@ -120,28 +129,34 @@ return array(
                         'authorization_code' => array(
                             'type' => 'field',
                             'name' => 'authorizationCode',
+                            'datatype' => 'string',
                         ),
                         'redirect_uri' => array(
                             'type' => 'field',
                             'name' => 'redirectUri',
+                            'datatype' => 'text',
                         ),
                         'expires' => array(
                             'type' => 'field',
                             'name' => 'expires',
+                            'datatype' => 'datetime',
                         ),
                         'scope' => array(
                             'type' => 'field',
                             'name' => 'scope',
+                            'datatype' => 'text',
                         ),
                         'id_token' => array(
                             'type' => 'field',
                             'name' => 'idToken',
+                            'datatype' => 'text',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
@@ -152,16 +167,19 @@ return array(
                         'subject' => array(
                             'type' => 'field',
                             'name' => 'subject',
+                            'datatype' => 'string',
                         ),
                         'public_key' => array(
                             'type' => 'field',
                             'name' => 'publicKey',
+                            'datatype' => 'text',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
@@ -172,24 +190,29 @@ return array(
                         'subject' => array(
                             'type' => 'field',
                             'name' => 'subject',
+                            'datatype' => 'string',
                         ),
                         'audience' => array(
                             'type' => 'field',
                             'name' => 'audience',
+                            'datatype' => 'string',
                         ),
                         'expires' => array(
                             'type' => 'field',
                             'name' => 'expires',
+                            'datatype' => 'datetime',
                         ),
                         'jti' => array(
                             'type' => 'field',
                             'name' => 'jti',
+                            'datatype' => 'text',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
@@ -200,20 +223,24 @@ return array(
                         'type' => array(
                             'type' => 'field',
                             'name' => 'type',
+                            'datatype' => 'string',
                         ),
                         'scope' => array(
                             'type' => 'field',
                             'name' => 'scope',
+                            'datatype' => 'text',
                         ),
                         'is_default' => array(
                             'type' => 'field',
                             'name' => 'isDefault',
+                            'datatype' => 'boolean',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
@@ -224,25 +251,28 @@ return array(
                         'public_key' => array(
                             'type' => 'field',
                             'name' => 'publicKey',
+                            'datatype' => 'text',
                         ),
                         'private_key' => array(
                             'type' => 'field',
                             'name' => 'privateKey',
+                            'datatype' => 'text',
                         ),
                         'encryption_algorithm' => array(
                             'type' => 'field',
                             'name' => 'encryptionAlgorithm',
+                            'datatype' => 'string',
                         ),
                         'client_id' => array(
                             'type' => 'relation',
                             'name' => 'client',
                             'entity_field_name' => 'id',
                             'entity' => 'OAuth2\Entity\Client',
+                            'datatype' => 'integer',
                         ),
                     ),
                 ),
             ),
-
         ),
     ),
-),
+);

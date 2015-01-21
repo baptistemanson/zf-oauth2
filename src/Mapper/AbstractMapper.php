@@ -22,12 +22,18 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
     /**
      * @var data
      */
-    protected $oauth2Data = array();
+    protected $oAuth2Data = array();
 
     /**
      * @var data
      */
     protected $doctrineData = array();
+
+    public function reset()
+    {
+        $this->oauth2Data = array();
+        $this->doctrineData = array();
+    }
 
     /**
      * Set the object manager
@@ -131,6 +137,10 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                             $oAuth2Data[$key] = $value;
                             $doctrineData[$config[$key]['name']] = DateTime::setTimestamp($value);
                             break;
+                        case 'boolean':
+                            $oAuth2Data[$key] = (int) (bool) $value;
+                            $doctrineData[$config[$key]['name']] = (bool) $value;
+                            break;
                         default:
                             $oAuth2Data[$key] = $value;
                             $doctrineData[$config[$key]['name']] = $value;
@@ -200,6 +210,10 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                             // Dates coming from Doctrine are datetimes
                             $oAuth2Data[$key] = $value->format('U');
                             $doctrineData[$config[$key]['name']] = $value;
+                            break;
+                        case 'boolean':
+                            $oAuth2Data[$key] = (int) $value;
+                            $doctrineData[$config[$key]['name']] = (bool) $value;
                             break;
                         default:
                             $oAuth2Data[$key] = $value;

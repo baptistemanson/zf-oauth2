@@ -29,7 +29,13 @@ class DoctrineAdapterFactory implements FactoryInterface
 
         $adapter = new DoctrineAdapter;
         $adapter->setConfig($oauth2ServerConfig);
+
+        if (isset($config['zf-oauth2']['storage_settings']['bcrypt_cost'])) {
+            $adapter->setBcryptCost($config['zf-oauth2']['storage_settings']['bcrypt_cost']);
+        }
+
         $adapter->setObjectManager($this->loadObjectManager($servcies, $config['zf-oauth2']['storage_settings']));
+        $adapter->setServiceLocator($services);
 
         return $adapter;
     }

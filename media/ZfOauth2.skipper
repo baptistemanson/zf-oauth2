@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<skipper version="3.0.0.1104" name="zf-oauth2" mvc="Without MVC" orm="Doctrine2" uuid="b7638313-3ca8-4389-9163-d2bb1c15f725">
+  <module name="ZF OAuth2" uuid="e33a902b-9096-46f4-81af-cb8fa813a736">
+    <entity name="User" uuid="7103834d-0fe7-4345-9f6e-0e5ef1f651a4">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="f51bece7-2323-4e19-a13b-adda319c9d96"/>
+      <field name="username" type="string" uuid="57457700-b3a0-48c0-9940-d9c4a5bf4c93"/>
+      <field name="password" type="string" uuid="f59dce61-7d3b-4c0b-8a0b-4bc8e7893bc5"/>
+      <field name="firstName" type="string" uuid="38555810-6254-4b5d-8326-5caaff50f787"/>
+      <field name="lastName" type="string" uuid="5ff7e90c-a2ff-43aa-9dee-0a9f3b6558a3"/>
+    </entity>
+    <entity name="Client" uuid="0e40a98d-82ec-47f1-acc0-649982b1c48a">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="f24288d3-c5ab-4e4f-a251-0bca949873d1"/>
+      <field name="secret" type="string" uuid="1b0c7264-2fce-4217-9011-ddc42ee9afd2"/>
+      <field name="redirectUri" type="text" uuid="e419d490-b93f-4a8b-b21b-03f3fc6a75ae"/>
+      <field name="grantType" type="string" uuid="475c289c-1057-4314-a146-955108acb56a"/>
+      <field name="scope" type="text" uuid="9131a4c2-1f02-4ceb-9951-38fc30d8c245"/>
+      <field name="user_id" type="integer" uuid="5eb7745e-9480-41ab-b124-c65aa92fbe98"/>
+    </entity>
+    <association from="Client" to="User" owner-alias="client" inverse-alias="user" uuid="450f3d3b-750e-4fe3-bc1c-eba7d5ad3009">
+      <association-field from="user_id" to="id"/>
+    </association>
+    <entity name="AccessToken" uuid="0cef011b-fcdf-4e6e-a813-2a8d49ba4748">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="b27267d6-52c7-4d23-b414-0dc5cf604105"/>
+      <field name="accessToken" type="string" uuid="209f4728-d8cc-498b-808f-ecd7b473eaa6"/>
+      <field name="expires" type="datetime" uuid="a1a27c78-6780-4bb9-882a-010170c2ab64"/>
+      <field name="scope" type="text" uuid="1ba7a0b6-3b24-4c36-a4c4-b77eb1e3629a"/>
+      <field name="client_id" type="integer" uuid="57674c7f-3b8f-4381-b9e4-dfe8d5eb8ca7"/>
+    </entity>
+    <association from="AccessToken" to="Client" owner-alias="accessToken" inverse-alias="client" uuid="d9c8b226-5b7a-4991-adb8-f01509ffdc87">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <entity name="RefreshToken" uuid="8c75fc92-0e0a-43ed-b5dc-5859aba057ae">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="7ac57601-29a0-493a-9728-ae22b8ea7b23"/>
+      <field name="refreshToken" type="string" uuid="847e9b03-a76d-4bd9-9905-b241bac4faf1"/>
+      <field name="expires" type="datetime" uuid="e1492093-51f1-4369-82ee-3e0711410879"/>
+      <field name="scope" type="text" uuid="35312bb8-511a-476b-97ff-e6312296696f"/>
+      <field name="client_id" type="integer" uuid="c0bb2d2f-f5d6-4232-953f-5b8e80025751"/>
+    </entity>
+    <association from="RefreshToken" to="Client" owner-alias="refreshToken" inverse-alias="client" uuid="3efa4b07-67d5-48a1-94e8-69ad2a5bc60e">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <entity name="AuthorizationCode" uuid="1b40f6a9-e21a-49d3-8d44-604e36d28d35">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="72326417-df2b-42a0-b46d-298cdae4ff4d"/>
+      <field name="authorizationCode" type="string" uuid="2a3c669d-f44f-4ef0-b283-118ca75eda38"/>
+      <field name="redirectUri" type="text" uuid="dea2004d-47b5-4c53-b1e9-3347e16ab350"/>
+      <field name="expires" type="datetime" uuid="48ad82e7-ff43-4561-a40f-99f71b7a6ecd"/>
+      <field name="scope" type="text" uuid="62700e7b-2580-44a5-9406-75b8012ec160"/>
+      <field name="idToken" type="text" uuid="0a5faae6-ad87-4aa6-bd17-325e84aa8961"/>
+      <field name="client_id" type="integer" uuid="471392b9-dd08-420b-9e01-bb305836c9cc"/>
+    </entity>
+    <association from="AuthorizationCode" to="Client" owner-alias="authorizationCode" inverse-alias="client" uuid="2664c472-a222-4480-80e6-34943b78930f">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <entity name="Jwt" uuid="9c143447-a1f4-4187-a5f9-45e768f78ebb">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="02e228e3-4d24-4334-add3-3358482e75ea"/>
+      <field name="subject" type="string" uuid="253a38fa-22dc-492f-8b3a-819481f3daec"/>
+      <field name="publicKey" type="text" uuid="fd97023c-adb4-4715-9026-fa446ba12129"/>
+      <field name="client_id" type="integer" uuid="508c578d-8f57-4c20-ab5e-3291cf6652cc"/>
+    </entity>
+    <association from="Jwt" to="Client" owner-alias="jwt" inverse-alias="client" uuid="6b2ceec2-f65b-4944-be20-613a797e5829">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <entity name="Jti" uuid="f42aa952-941d-4cec-adaf-5df5bc023867">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="1e6f57e8-be62-4f52-9679-45be5681211c"/>
+      <field name="subject" type="string" uuid="4248a4db-cb20-4de9-af74-0df6ff0cf7f8"/>
+      <field name="audience" type="string" uuid="397557b3-5117-4ad6-9012-a46c809b93e3"/>
+      <field name="expires" type="datetime" uuid="27ee9c72-e4ca-469a-9cdb-8375ac735979"/>
+      <field name="jti" type="text" uuid="07d4de52-147f-4355-b4bf-8948d258580c"/>
+      <field name="client_id" type="integer" uuid="e016f63a-2812-4988-a728-d3ea46167da2"/>
+    </entity>
+    <association from="Jti" to="Client" owner-alias="jti" inverse-alias="client" uuid="1a897fc1-617e-4cc3-82b7-54f564d3335d">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <entity name="Scope" uuid="8cc40580-9611-471f-a6c7-9a64ec3b2869">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="c8033880-f92f-47e6-bbf8-e9f8a99299fb"/>
+      <field name="type" type="string" uuid="f630469d-fa4f-4232-9c6b-9609e3ea7853"/>
+      <field name="scope" type="text" uuid="54d7a7b3-1ffc-44f5-a198-fcd2d1f14dd5"/>
+      <field name="isDefault" type="boolean" uuid="944d76ea-159b-43fb-a182-5100908dfd7b"/>
+      <field name="client_id" type="integer" uuid="f572c06d-8e96-4536-9590-a06db13145c9"/>
+    </entity>
+    <association from="Scope" to="Client" owner-alias="scope" inverse-alias="client" uuid="63fa8d9d-3bcf-461a-afd8-9aefba3c80f7">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <entity name="PublicKey" uuid="b6562bcc-4fca-413e-a560-91da4d75dc9f">
+      <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="522217c1-f9e7-445d-a709-75c846b9724f"/>
+      <field name="publicKey" type="text" uuid="25e4e0a0-f374-462e-acb1-80335f0f995a"/>
+      <field name="privateKey" type="text" uuid="f20479d1-190f-42da-a99d-214515ccef6a"/>
+      <field name="encryptionAlgorithm" type="string" uuid="83593e76-ad34-4103-b524-37898567ede8"/>
+      <field name="client_id" type="integer" uuid="8bbf535b-14cb-432c-921f-c9cf693db8e2"/>
+    </entity>
+    <association from="PublicKey" to="Client" owner-alias="publicKey" inverse-alias="client" uuid="9daca6d8-8f09-4f97-bbfd-6db05bdf3e58">
+      <association-field from="client_id" to="id"/>
+    </association>
+    <orm-attributes>
+      <attribute name="namespace">OAuth2\Entity</attribute>
+    </orm-attributes>
+  </module>
+  <visual-data>
+    <entity uuid="0cef011b-fcdf-4e6e-a813-2a8d49ba4748" bg-color="4294967295" hdr-color="4292006610" position-x="457" position-y="18" size-x="0" size-x2="106" size-y="0" size-y2="87"/>
+    <entity uuid="0e40a98d-82ec-47f1-acc0-649982b1c48a" bg-color="4294967295" hdr-color="4292006610" position-x="273" position-y="111" size-x="0" size-x2="94" size-y="0" size-y2="101"/>
+    <association uuid="1a897fc1-617e-4cc3-82b7-54f564d3335d" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <entity uuid="1b40f6a9-e21a-49d3-8d44-604e36d28d35" bg-color="4294967295" hdr-color="4292006610" position-x="439" position-y="299" size-x="0" size-x2="127" size-y="0" size-y2="115"/>
+    <association uuid="2664c472-a222-4480-80e6-34943b78930f" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <association uuid="3efa4b07-67d5-48a1-94e8-69ad2a5bc60e" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <association uuid="450f3d3b-750e-4fe3-bc1c-eba7d5ad3009" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <association uuid="63fa8d9d-3bcf-461a-afd8-9aefba3c80f7" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <association uuid="6b2ceec2-f65b-4944-be20-613a797e5829" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <entity uuid="7103834d-0fe7-4345-9f6e-0e5ef1f651a4" bg-color="4294967295" hdr-color="4292006610" position-x="47" position-y="14" size-x="0" size-x2="94" size-y="0" size-y2="87"/>
+    <entity uuid="8c75fc92-0e0a-43ed-b5dc-5859aba057ae" bg-color="4294967295" hdr-color="4292006610" position-x="456" position-y="136" size-x="0" size-x2="106" size-y="0" size-y2="87"/>
+    <entity uuid="8cc40580-9611-471f-a6c7-9a64ec3b2869" bg-color="4294967295" hdr-color="4292006610" position-x="325" position-y="346" size-x="0" size-x2="99" size-y="0" size-y2="87"/>
+    <entity uuid="9c143447-a1f4-4187-a5f9-45e768f78ebb" bg-color="4294967295" hdr-color="4292006610" position-x="47" position-y="125" size-x="0" size-x2="93" size-y="0" size-y2="73"/>
+    <association uuid="9daca6d8-8f09-4f97-bbfd-6db05bdf3e58" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <entity uuid="b6562bcc-4fca-413e-a560-91da4d75dc9f" bg-color="4294967295" hdr-color="4292006610" position-x="139" position-y="345" size-x="0" size-x2="134" size-y="0" size-y2="87"/>
+    <project uuid="b7638313-3ca8-4389-9163-d2bb1c15f725" size-x="0" size-x2="753" size-y="0" size-y2="719"/>
+    <association uuid="d9c8b226-5b7a-4991-adb8-f01509ffdc87" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
+    <module uuid="e33a902b-9096-46f4-81af-cb8fa813a736" bg-color="4294959018" position-x="61" position-y="72" size-x="11" size-x2="655" size-y="22" size-y2="601"/>
+    <entity uuid="f42aa952-941d-4cec-adaf-5df5bc023867" bg-color="4294967295" hdr-color="4292006610" position-x="44" position-y="210" size-x="0" size-x2="96" size-y="0" size-y2="101"/>
+  </visual-data>
+</skipper>

@@ -2,34 +2,27 @@
 
 namespace OAuth2\Storage;
 
-use OAuth2\OpenID\Storage\UserClaimsInterface;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use OAuth2\OpenID\Storage\UserClaimsInterface as OpenIDUserClaimsInterface;
 use OAuth2\OpenID\Storage\AuthorizationCodeInterface as OpenIDAuthorizationCodeInterface;
-use OAuth2\Storage\AuthorizationCodeInterface,
-use OAuth2\Storage\AccessTokenInterface,
-use OAuth2\Storage\ClientCredentialsInterface,
-use OAuth2\Storage\UserCredentialsInterface,
-use OAuth2\Storage\RefreshTokenInterface,
-use OAuth2\Storage\JwtBearerInterface,
-use OAuth2\Storage\ScopeInterface,
-use OAuth2\Storage\PublicKeyInterface,
-use OAuth2\Storage\UserClaimsInterface,
-use OAuth2\Storage\OpenIDAuthorizationCodeInterface
+use OAuth2\Storage\AuthorizationCodeInterface;
+use OAuth2\Storage\AccessTokenInterface;
+use OAuth2\Storage\ClientCredentialsInterface;
+use OAuth2\Storage\UserCredentialsInterface;
+use OAuth2\Storage\RefreshTokenInterface;
+use OAuth2\Storage\JwtBearerInterface;
+use OAuth2\Storage\ScopeInterface;
+use OAuth2\Storage\PublicKeyInterface;
 use DoctrineModule\Persistence\ObjectManagerAwareInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Exception;
 use DateTime;
 
 /**
- * Simple PDO storage for all storage types
+ * Doctrine storage for OAuth2
  *
- * NOTE: This class is meant to get users started
- * quickly. If your application requires further
- * customization, extend this class or create your own.
- *
- * NOTE: Passwords are stored in plaintext, which is never
- * a good idea.  Be sure to override this for your application
- *
- * @author Brent Shaffer <bshafs at gmail dot com>
+ * @author Tom Anderson <tom.h.anderson@gmail.com>
  */
 class DoctrineAdapter implements
     AuthorizationCodeInterface,
@@ -40,14 +33,108 @@ class DoctrineAdapter implements
     JwtBearerInterface,
     ScopeInterface,
     PublicKeyInterface,
-    UserClaimsInterface,
+    OpenIDUserClaimsInterface,
     OpenIDAuthorizationCodeInterface,
-    ObjectManagerAwareInterface
+    ObjectManagerAwareInterface,
+    ServiceLocatorAwareInterface
 {
     /**
      * @var ObjectManager
      */
     protected $objectManager;
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Set service locator
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     */
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;
+
+        return $this;
+    }
+
+    /**
+     * Get service locator
+     *
+     * @return ServiceLocatorInterface
+     */
+    public function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
+
+    /**
+     * @var int
+     */
+    protected $bcryptCost = 10;
+
+    /**
+     * @var Bcrypt
+     */
+    protected $bcrypt;
+
+    /**
+     * @return Bcrypt
+     */
+    public function getBcrypt()
+    {
+        if (null === $this->bcrypt) {
+            $this->bcrypt = new Bcrypt();
+            $this->bcrypt->setCost($this->bcryptCost);
+        }
+
+        return $this->bcrypt;
+    }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function setBcryptCost($value)
+    {
+        $this->bcryptCost = (int) $value;
+        return $this;
+    }
+
+    /**
+     * Check password using bcrypt
+     *
+     * @param string $user
+     * @param string $password
+     * @return bool
+     */
+    protected function checkPassword($user, $password)
+    {
+        return $this->verifyHash($password, $user['password']);
+    }
+
+    /**
+     * @param $string
+     */
+    protected function createBcryptHash(&$string)
+    {
+        $string = $this->getBcrypt()->create($string);
+    }
+
+    /**
+     * Check hash using bcrypt
+     *
+     * @param $hash
+     * @param $check
+     * @return bool
+     */
+    protected function verifyHash($check, $hash)
+    {
+        return $this->getBcrypt()->verify($check, $hash);
+    }
 
     /**
      * Set the object manager
@@ -72,234 +159,7 @@ class DoctrineAdapter implements
     /**
      * @var array
      */
-    protected $config = array(
-        'OAuth2\Mapper\User' => array(
-            'entity' => 'OAuth2\Entity\User',
-            'mapping' => array(
-                'username' => array(
-                    'type' => 'field',
-                    'name' => 'username',
-                    'datatype' => 'string',
-                ),
-                'password' => array(
-                    'type' => 'field',
-                    'name' => 'password',
-                    'datatype' => 'string',
-                ),
-                'first_name' => array(
-                    'type' => 'field',
-                    'name' => 'firstName',
-                    'datatype' => 'string',
-                ),
-                'last_name' => array(
-                    'type' => 'field',
-                    'name' => 'lastName',
-                    'datatype' => 'string',
-                ),
-            ),
-        ),
-        'client_entity' => array(
-            'entity' => 'OAuth2\Entity\Client',
-            'mapping' => array(
-                'secret' => array(
-                    'type' => 'field',
-                    'name' => 'secret',
-                    'datatype' => 'string',
-                ),
-                'redirect_uri' => array(
-                    'type' => 'field',
-                    'name' => 'redirectUri',
-                    'datatype' => 'text',
-                ),
-                'grant_type' => array(
-                    'type' => 'field',
-                    'name' => 'grantType',
-                    'datatype' => 'string',
-                ),
-                'scope' => array(
-                    'type' => 'field',
-                    'name' => 'scope',
-                    'datatype' => 'text',
-                ),
-                'user_id' => array(
-                    'type' => 'relation',
-                    'name' => 'user',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\User',
-                    'datatype' => 'integer',
-                ),
-            ),
-        ),
-        'access_token_entity' => array(
-            'entity' => 'OAuth2\Entity\AccessToken',
-            'mapping' => array(
-                'access_token' => array(
-                    'type' => 'field',
-                    'name' => 'accessToken',
-                ),
-                'expires' => array(
-                    'type' => 'field',
-                    'name' => 'expires',
-                ),
-                'scope' => array(
-                    'type' => 'field',
-                    'name' => 'scope',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-        'refresh_token_entity' => array(
-            'entity' => 'OAuth2\Entity\RefreshToken',
-            'mapping' => array(
-                'refresh_token' => array(
-                    'type' => 'field',
-                    'name' => 'refreshToken',
-                ),
-                'expires' => array(
-                    'type' => 'field',
-                    'name' => 'expires',
-                ),
-                'scope' => array(
-                    'type' => 'field',
-                    'name' => 'scope',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-        'authorization_code_entity' => array(
-            'entity' => 'OAuth2\Entity\Code',
-            'mapping' => array(
-                'authorization_code' => array(
-                    'type' => 'field',
-                    'name' => 'authorizationCode',
-                ),
-                'redirect_uri' => array(
-                    'type' => 'field',
-                    'name' => 'redirectUri',
-                ),
-                'expires' => array(
-                    'type' => 'field',
-                    'name' => 'expires',
-                ),
-                'scope' => array(
-                    'type' => 'field',
-                    'name' => 'scope',
-                ),
-                'id_token' => array(
-                    'type' => 'field',
-                    'name' => 'idToken',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-        'jwt_entity' => array(
-            'entity' => 'OAuth2\Entity\Jwt',
-            'mapping' => array(
-                'subject' => array(
-                    'type' => 'field',
-                    'name' => 'subject',
-                ),
-                'public_key' => array(
-                    'type' => 'field',
-                    'name' => 'publicKey',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-        'jti_entity' => array(
-            'entity' => 'OAuth2\Entity\Jti',
-            'mapping' => array(
-                'subject' => array(
-                    'type' => 'field',
-                    'name' => 'subject',
-                ),
-                'audience' => array(
-                    'type' => 'field',
-                    'name' => 'audience',
-                ),
-                'expires' => array(
-                    'type' => 'field',
-                    'name' => 'expires',
-                ),
-                'jti' => array(
-                    'type' => 'field',
-                    'name' => 'jti',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-        'scope_entity' => array(
-            'entity' => 'OAuth2\Entity\Scope',
-            'mapping' => array(
-                'type' => array(
-                    'type' => 'field',
-                    'name' => 'type',
-                ),
-                'scope' => array(
-                    'type' => 'field',
-                    'name' => 'scope',
-                ),
-                'is_default' => array(
-                    'type' => 'field',
-                    'name' => 'isDefault',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-        'public_key_entity' => array(
-            'entity' => 'OAuth2\Entity\PublicKey',
-            'mapping' => array(
-                'public_key' => array(
-                    'type' => 'field',
-                    'name' => 'publicKey',
-                ),
-                'private_key' => array(
-                    'type' => 'field',
-                    'name' => 'privateKey',
-                ),
-                'encryption_algorithm' => array(
-                    'type' => 'field',
-                    'name' => 'encryptionAlgorithm',
-                ),
-                'client_id' => array(
-                    'type' => 'relation',
-                    'name' => 'client',
-                    'entity_field_name' => 'id',
-                    'entity' => 'OAuth2\Entity\Client',
-                ),
-            ),
-        ),
-    );
+    protected $config = array();
 
     /**
      * Set the config for the entities implementing the interfaces
@@ -308,7 +168,7 @@ class DoctrineAdapter implements
      */
     public function setConfig($config)
     {
-        $this->config = array_merge($this->config), $config);
+        $this->config = array_merge($this->config, $config);
     }
 
     // plaintext passwords are bad!  Override this for your application
@@ -336,14 +196,23 @@ class DoctrineAdapter implements
      */
     public function checkClientCredentials($client_id, $client_secret)
     {
-        return (bool) $this->getObjectManager()
-            ->getRepository($this->config['client_entity'])
+        $config = $this->getConfig();
+        $doctrineClientIdField = $config['ZF\OAuth2\Mapper\Client']['client_id']['name'];
+
+        $client = $this->getObjectManager()
+            ->getRepository($config['ZF\OAuth2\Mapper\Client']['entity'])
             ->findOneBy(
                 array(
-                    'id'     => $client_id,
-                    'secret' => $client_secret,
+                    $doctrineClientIdField => $client_id,
                 )
             );
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\Client');
+        $mapper->reset();
+        $mapper->exchangeDoctrineArray($client->getArrayCopy());
+        $data = $mapper->getOAuth2ArrayCopy();
+
+        return $this->verifyHash($client_secret, $data['client_secret']);
     }
 
     /* OAuth2\Storage\ClientCredentialsInterface */
@@ -373,7 +242,7 @@ class DoctrineAdapter implements
             throw new Exception('Client not found');
         }
 
-        return empty($client->getSecret());
+        return ($client->getSecret()) ? true: false;
     }
 
 
@@ -598,7 +467,7 @@ class DoctrineAdapter implements
      *
      * @ingroup oauth2_section_4
      */
-    public function getAuthorizationCode($code)
+    public function getAuthorizationCode($code) {
         $authorizationCode = $this->getObjectManager()
             ->getRepository($this->config['authorization_code_entity'])
             ->find($code);
@@ -965,7 +834,7 @@ class DoctrineAdapter implements
      *     null
      */
      # client_id is not used?
-    public function getDefaultScope($client_id = null);
+    public function getDefaultScope($client_id = null)
     {
         $scope = $this->getObjectManager()
             ->getRepository($this->config['scope_entity'])
@@ -1110,27 +979,12 @@ class DoctrineAdapter implements
     }
 
     /* OAuth2\Storate\PublicKeyInterface */
-    public function getEncryptionAlgorithm($client_id = null);
+    public function getEncryptionAlgorithm($client_id = null)
     {
         $publicKey = $this->getObjectManager()
             ->getRepository($this->config['public_key_entity'])
             ->findOneBy(array('client_id' => $client_id));
 
         return ($publicKey) ? $publicKey->getEncryptionAlgorithm(): 'RS256';
-    }
-
-
-// dup with client interface
-    public function getClientScope($client_id)
-    {
-        if (!$clientDetails = $this->getClientDetails($client_id)) {
-            return false;
-        }
-
-        if (isset($clientDetails['scope'])) {
-            return $clientDetails['scope'];
-        }
-
-        return null;
     }
 }
