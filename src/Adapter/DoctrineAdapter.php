@@ -73,15 +73,232 @@ class DoctrineAdapter implements
      * @var array
      */
     protected $config = array(
-        'client_entity'             => 'OAuth2\Doctrine\Entity\Client',
-        'access_token_entity'       => 'OAuth2\Doctrine\Entity\AccessToken',
-        'refresh_token_entity'      => 'OAuth2\Doctrine\Entity\RefreshToken',
-        'authorization_code_entity' => 'OAuth2\Doctrine\Entity\Code',
-        'user_entity'               => 'OAuth2\Doctrine\Entity\User',
-        'jwt_entity'                => 'OAuth2\Doctrine\Entity\Jwt',
-        'jti_entity'                => 'OAuth2\Doctrine\Entity\Jti',
-        'scope_entity'              => 'OAuth2\Doctrine\Entity\Scope',
-        'public_key_entity'         => 'OAuth2\Doctrine\Entity\PublicKey',
+        'OAuth2\Mapper\User' => array(
+            'entity' => 'OAuth2\Entity\User',
+            'mapping' => array(
+                'username' => array(
+                    'type' => 'field',
+                    'name' => 'username',
+                    'datatype' => 'string',
+                ),
+                'password' => array(
+                    'type' => 'field',
+                    'name' => 'password',
+                    'datatype' => 'string',
+                ),
+                'first_name' => array(
+                    'type' => 'field',
+                    'name' => 'firstName',
+                    'datatype' => 'string',
+                ),
+                'last_name' => array(
+                    'type' => 'field',
+                    'name' => 'lastName',
+                    'datatype' => 'string',
+                ),
+            ),
+        ),
+        'client_entity' => array(
+            'entity' => 'OAuth2\Entity\Client',
+            'mapping' => array(
+                'secret' => array(
+                    'type' => 'field',
+                    'name' => 'secret',
+                    'datatype' => 'string',
+                ),
+                'redirect_uri' => array(
+                    'type' => 'field',
+                    'name' => 'redirectUri',
+                    'datatype' => 'text',
+                ),
+                'grant_type' => array(
+                    'type' => 'field',
+                    'name' => 'grantType',
+                    'datatype' => 'string',
+                ),
+                'scope' => array(
+                    'type' => 'field',
+                    'name' => 'scope',
+                    'datatype' => 'text',
+                ),
+                'user_id' => array(
+                    'type' => 'relation',
+                    'name' => 'user',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\User',
+                    'datatype' => 'integer',
+                ),
+            ),
+        ),
+        'access_token_entity' => array(
+            'entity' => 'OAuth2\Entity\AccessToken',
+            'mapping' => array(
+                'access_token' => array(
+                    'type' => 'field',
+                    'name' => 'accessToken',
+                ),
+                'expires' => array(
+                    'type' => 'field',
+                    'name' => 'expires',
+                ),
+                'scope' => array(
+                    'type' => 'field',
+                    'name' => 'scope',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
+        'refresh_token_entity' => array(
+            'entity' => 'OAuth2\Entity\RefreshToken',
+            'mapping' => array(
+                'refresh_token' => array(
+                    'type' => 'field',
+                    'name' => 'refreshToken',
+                ),
+                'expires' => array(
+                    'type' => 'field',
+                    'name' => 'expires',
+                ),
+                'scope' => array(
+                    'type' => 'field',
+                    'name' => 'scope',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
+        'authorization_code_entity' => array(
+            'entity' => 'OAuth2\Entity\Code',
+            'mapping' => array(
+                'authorization_code' => array(
+                    'type' => 'field',
+                    'name' => 'authorizationCode',
+                ),
+                'redirect_uri' => array(
+                    'type' => 'field',
+                    'name' => 'redirectUri',
+                ),
+                'expires' => array(
+                    'type' => 'field',
+                    'name' => 'expires',
+                ),
+                'scope' => array(
+                    'type' => 'field',
+                    'name' => 'scope',
+                ),
+                'id_token' => array(
+                    'type' => 'field',
+                    'name' => 'idToken',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
+        'jwt_entity' => array(
+            'entity' => 'OAuth2\Entity\Jwt',
+            'mapping' => array(
+                'subject' => array(
+                    'type' => 'field',
+                    'name' => 'subject',
+                ),
+                'public_key' => array(
+                    'type' => 'field',
+                    'name' => 'publicKey',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
+        'jti_entity' => array(
+            'entity' => 'OAuth2\Entity\Jti',
+            'mapping' => array(
+                'subject' => array(
+                    'type' => 'field',
+                    'name' => 'subject',
+                ),
+                'audience' => array(
+                    'type' => 'field',
+                    'name' => 'audience',
+                ),
+                'expires' => array(
+                    'type' => 'field',
+                    'name' => 'expires',
+                ),
+                'jti' => array(
+                    'type' => 'field',
+                    'name' => 'jti',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
+        'scope_entity' => array(
+            'entity' => 'OAuth2\Entity\Scope',
+            'mapping' => array(
+                'type' => array(
+                    'type' => 'field',
+                    'name' => 'type',
+                ),
+                'scope' => array(
+                    'type' => 'field',
+                    'name' => 'scope',
+                ),
+                'is_default' => array(
+                    'type' => 'field',
+                    'name' => 'isDefault',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
+        'public_key_entity' => array(
+            'entity' => 'OAuth2\Entity\PublicKey',
+            'mapping' => array(
+                'public_key' => array(
+                    'type' => 'field',
+                    'name' => 'publicKey',
+                ),
+                'private_key' => array(
+                    'type' => 'field',
+                    'name' => 'privateKey',
+                ),
+                'encryption_algorithm' => array(
+                    'type' => 'field',
+                    'name' => 'encryptionAlgorithm',
+                ),
+                'client_id' => array(
+                    'type' => 'relation',
+                    'name' => 'client',
+                    'entity_field_name' => 'id',
+                    'entity' => 'OAuth2\Entity\Client',
+                ),
+            ),
+        ),
     );
 
     /**
@@ -276,13 +493,9 @@ class DoctrineAdapter implements
     {
         $client = (bool) $this->getObjectManager()
             ->getRepository($this->config['client_entity'])
-            ->find($client_id);
+            ->findOneBy(array('client_id' => $client_id));
 
-        if (!$client) {
-            return false;
-        }
-
-        return $client->getScope();
+        return ($client) ? $client->getScope(): '';
     }
 
     /* OAuth2\Storage\AccessTokenInterface */
@@ -876,135 +1089,36 @@ class DoctrineAdapter implements
         return true;
     }
 
-
-
-
-
-
-
-
-
-
-    /* PublicKeyInterface */
+    /* OAuth2\Storate\PublicKeyInterface */
     public function getPublicKey($client_id = null)
     {
-        $stmt = $this->db->prepare($sql = sprintf('SELECT public_key FROM %s WHERE client_id=:client_id OR client_id IS NULL ORDER BY client_id IS NOT NULL DESC', $this->config['public_key_table']));
+        $publicKey = $this->getObjectManager()
+            ->getRepository($this->config['public_key_entity'])
+            ->findOneBy(array('client_id' => $client_id));
 
-        $stmt->execute(compact('client_id'));
-        if ($result = $stmt->fetch(\PDO::FETCH_BOTH)) {
-            return $result['public_key'];
-        }
+        return $publicKey->getPublicKey();
     }
 
+    /* OAuth2\Storate\PublicKeyInterface */
     public function getPrivateKey($client_id = null)
     {
-        $stmt = $this->db->prepare($sql = sprintf('SELECT private_key FROM %s WHERE client_id=:client_id OR client_id IS NULL ORDER BY client_id IS NOT NULL DESC', $this->config['public_key_table']));
+        $publicKey = $this->getObjectManager()
+            ->getRepository($this->config['public_key_entity'])
+            ->findOneBy(array('client_id' => $client_id));
 
-        $stmt->execute(compact('client_id'));
-        if ($result = $stmt->fetch(\PDO::FETCH_BOTH)) {
-            return $result['private_key'];
-        }
+        return $publicKey->getPrivateKey();
     }
 
-    public function getEncryptionAlgorithm($client_id = null)
+    /* OAuth2\Storate\PublicKeyInterface */
+    public function getEncryptionAlgorithm($client_id = null);
     {
-        $stmt = $this->db->prepare($sql = sprintf('SELECT encryption_algorithm FROM %s WHERE client_id=:client_id OR client_id IS NULL ORDER BY client_id IS NOT NULL DESC', $this->config['public_key_table']));
+        $publicKey = $this->getObjectManager()
+            ->getRepository($this->config['public_key_entity'])
+            ->findOneBy(array('client_id' => $client_id));
 
-        $stmt->execute(compact('client_id'));
-        if ($result = $stmt->fetch(\PDO::FETCH_BOTH)) {
-            return $result['encryption_algorithm'];
-        }
-
-        return 'RS256';
+        return ($publicKey) ? $publicKey->getEncryptionAlgorithm(): 'RS256';
     }
 
-    /**
-     * DDL to create OAuth2 database and tables for PDO storage
-     *
-     * @see https://github.com/dsquier/oauth2-server-php-mysql
-     */
-    public function getBuildSql($dbName = 'oauth2_server_php')
-    {
-        $sql = "
-        CREATE TABLE {$this->config['client_table']} (
-          client_id             VARCHAR(80)   NOT NULL,
-          client_secret         VARCHAR(80)   NOT NULL,
-          redirect_uri          VARCHAR(2000),
-          grant_types           VARCHAR(80),
-          scope                 VARCHAR(4000),
-          user_id               VARCHAR(80),
-          PRIMARY KEY (client_id)
-        );
-
-        CREATE TABLE {$this->config['access_token_table']} (
-          access_token         VARCHAR(40)    NOT NULL,
-          client_id            VARCHAR(80)    NOT NULL,
-          user_id              VARCHAR(80),
-          expires              TIMESTAMP      NOT NULL,
-          scope                VARCHAR(4000),
-          PRIMARY KEY (access_token)
-        );
-
-        CREATE TABLE {$this->config['code_table']} (
-          authorization_code  VARCHAR(40)    NOT NULL,
-          client_id           VARCHAR(80)    NOT NULL,
-          user_id             VARCHAR(80),
-          redirect_uri        VARCHAR(2000),
-          expires             TIMESTAMP      NOT NULL,
-          scope               VARCHAR(4000),
-          id_token            VARCHAR(1000),
-          PRIMARY KEY (authorization_code)
-        );
-
-        CREATE TABLE {$this->config['refresh_token_table']} (
-          refresh_token       VARCHAR(40)    NOT NULL,
-          client_id           VARCHAR(80)    NOT NULL,
-          user_id             VARCHAR(80),
-          expires             TIMESTAMP      NOT NULL,
-          scope               VARCHAR(4000),
-          PRIMARY KEY (refresh_token)
-        );
-
-        CREATE TABLE {$this->config['user_table']} (
-          username            VARCHAR(80),
-          password            VARCHAR(80),
-          first_name          VARCHAR(80),
-          last_name           VARCHAR(80),
-          email               VARCHAR(80),
-          email_verified      BOOLEAN,
-          scope               VARCHAR(4000)
-        );
-
-        CREATE TABLE {$this->config['scope_table']} (
-          scope               VARCHAR(80)  NOT NULL,
-          is_default          BOOLEAN,
-          PRIMARY KEY (scope)
-        );
-
-        CREATE TABLE {$this->config['jwt_table']} (
-          client_id           VARCHAR(80)   NOT NULL,
-          subject             VARCHAR(80),
-          public_key          VARCHAR(2000) NOT NULL
-        );
-
-        CREATE TABLE {$this->config['jti_table']} (
-          issuer              VARCHAR(80)   NOT NULL,
-          subject             VARCHAR(80),
-          audiance            VARCHAR(80),
-          expires             TIMESTAMP     NOT NULL,
-          jti                 VARCHAR(2000) NOT NULL
-        );
-
-        CREATE TABLE {$this->config['public_key_table']} (
-          client_id            VARCHAR(80),
-          public_key           VARCHAR(2000),
-          private_key          VARCHAR(2000),
-          encryption_algorithm VARCHAR(100) DEFAULT 'RS256'
-        )
-";
-
-        return $sql;
-    }
 
 // dup with client interface
     public function getClientScope($client_id)
