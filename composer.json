@@ -6,7 +6,8 @@
         "api",
         "oauth2",
         "framework",
-        "zf2"
+        "zf2",
+        "doctrine"
     ],
     "repositories": [
         { "type": "composer", "url": "https://packages.zendframework.com/" }
