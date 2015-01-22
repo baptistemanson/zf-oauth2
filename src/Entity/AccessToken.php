@@ -3,11 +3,12 @@
 namespace ZF\OAuth2\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Zend\Stdlib\ArraySerializableInterface;
 
 /**
  * AccessToken
  */
-class AccessToken
+class AccessToken implements ArraySerializableInterface
 {
     /**
      * @var string
@@ -34,6 +35,32 @@ class AccessToken
      */
     private $client;
 
+    public function getArrayCopy()
+    {
+        throw new \Exception('getArrayCopy not implemented');
+    }
+
+    public function exchangeArray(array $array)
+    {
+        foreach ($array as $key => $value) {
+            $key = strtolower($key);
+            switch ($key) {
+                case 'accesstoken':
+                    $this->setAccessToken($value);
+                    break;
+                case 'expires':
+                    $this->setExpires($value);
+                    break;
+                case 'scope':
+                    $this->setScope($value);
+                    break;
+                default:
+                    break;
+           }
+       }
+
+       return $this;
+    }
 
     /**
      * Set accessToken
@@ -51,7 +78,7 @@ class AccessToken
     /**
      * Get accessToken
      *
-     * @return string 
+     * @return string
      */
     public function getAccessToken()
     {
@@ -74,7 +101,7 @@ class AccessToken
     /**
      * Get expires
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getExpires()
     {
@@ -97,7 +124,7 @@ class AccessToken
     /**
      * Get scope
      *
-     * @return string 
+     * @return string
      */
     public function getScope()
     {
@@ -107,7 +134,7 @@ class AccessToken
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -130,7 +157,7 @@ class AccessToken
     /**
      * Get client
      *
-     * @return \ZF\OAuth2\Entity\Client 
+     * @return \ZF\OAuth2\Entity\Client
      */
     public function getClient()
     {

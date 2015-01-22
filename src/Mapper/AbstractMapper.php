@@ -115,6 +115,10 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
         $config = $this->getConfig();
 
         foreach ($array as $key => $value) {
+            if (!isset($config['mapping'][$key])) {
+                continue;
+            }
+
             switch ($config['mapping'][$key]['type']) {
                 // Set the value in data
                 case 'field':
@@ -122,7 +126,9 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                         case 'datetime':
                             // Dates coming from OAuth2 are timestamps
                             $oAuth2Data[$key] = $value;
-                            $doctrineData[$config['mapping'][$key]['name']] = DateTime::setTimestamp($value);
+                            $date = new DateTime();
+                            $date->setTimestamp($value);
+                            $doctrineData[$config['mapping'][$key]['name']] = $date;
                             break;
                         case 'boolean':
                             $oAuth2Data[$key] = (int) (bool) $value;
@@ -145,7 +151,7 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                         throw new Exception("Relation was not found: $key: $value");
                     }
 
-                    $oAuth2Data[$key] = ($relation) ? $value: $relation;
+                    $oAuth2Data[$key] = $value;
                     $doctrineData[$config['mapping'][$key]['name']] = $relation;
                     break;
                 default:
