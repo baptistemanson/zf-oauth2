@@ -3,11 +3,12 @@
 namespace ZF\OAuth2\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Zend\Stdlib\ArraySerializableInterface;
 
 /**
  * User
  */
-class User
+class User implements ArraySerializableInterface
 {
     /**
      * @var string
@@ -39,6 +40,43 @@ class User
      */
     private $client;
 
+    public function getArrayCopy()
+    {
+        return array(
+            'id' => $this->getId(),
+            'username' => $this->getUsername(),
+            'password' => $this->getPassword(),
+            'firstName' => $this->getFirstName(),
+            'lastName' => $this->getLastName(),
+        );
+    }
+
+    public function exchangeArray(array $array)
+    {
+        foreach ($array as $key => $value) {
+            $key = strtolower($key);
+            $key = str_replace('_', '', $key);
+            switch ($key) {
+                case 'username':
+                    $this->setUsername($value);
+                    break;
+                case 'password':
+                    $this->setPassword($value);
+                    break;
+                case 'firstName':
+                    $this->setFirstName($value);
+                    break;
+                case 'lastName':
+                    $this->setLastName($value);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return $this;
+    }
+
     /**
      * Constructor
      */
@@ -63,7 +101,7 @@ class User
     /**
      * Get username
      *
-     * @return string 
+     * @return string
      */
     public function getUsername()
     {
@@ -86,7 +124,7 @@ class User
     /**
      * Get password
      *
-     * @return string 
+     * @return string
      */
     public function getPassword()
     {
@@ -109,7 +147,7 @@ class User
     /**
      * Get firstName
      *
-     * @return string 
+     * @return string
      */
     public function getFirstName()
     {
@@ -132,7 +170,7 @@ class User
     /**
      * Get lastName
      *
-     * @return string 
+     * @return string
      */
     public function getLastName()
     {
@@ -142,7 +180,7 @@ class User
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -175,7 +213,7 @@ class User
     /**
      * Get client
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getClient()
     {
