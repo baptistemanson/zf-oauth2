@@ -3,11 +3,12 @@
 namespace ZF\OAuth2\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Zend\Stdlib\ArraySerializableInterface;
 
 /**
  * AuthorizationCode
  */
-class AuthorizationCode
+class AuthorizationCode implements ArraySerializableInterface
 {
     /**
      * @var string
@@ -44,6 +45,50 @@ class AuthorizationCode
      */
     private $client;
 
+    public function exchangeArray(array $array)
+    {
+        foreach ($array as $key => $value) {
+            $key = strtolower($key);
+            switch ($key) {
+                case 'authorizationcode':
+                    $this->setAuthorizationCode($value);
+                    break;
+                case 'client':
+                    $this->setClient($value);
+                    break;
+                case 'redirectUri':
+                    $this->setRedirectUri($value);
+                    break;
+                case 'expires':
+                    $this->setExpires($value);
+                    break;
+                case 'scope':
+                    $this->setScope($value);
+                    break;
+                case 'idtoken':
+                    $this->setIdToken($value);
+                    break;
+                default:
+                    break;
+
+            }
+        }
+
+        return $this;
+    }
+
+    public function getArrayCopy()
+    {
+        return array(
+            'id' => $this->getId(),
+            'authorizationCode' => $this->getAuthorizationCode(),
+            'redirectUri' => $this->getRedirectUri(),
+            'client' => $this->getClient(),
+            'expires' => $this->getExpires(),
+            'scope' => $this->getScope(),
+            'idToken' => $this->getIdToken(),
+        );
+    }
 
     /**
      * Set authorizationCode
@@ -61,7 +106,7 @@ class AuthorizationCode
     /**
      * Get authorizationCode
      *
-     * @return string 
+     * @return string
      */
     public function getAuthorizationCode()
     {
@@ -84,7 +129,7 @@ class AuthorizationCode
     /**
      * Get redirectUri
      *
-     * @return string 
+     * @return string
      */
     public function getRedirectUri()
     {
@@ -107,7 +152,7 @@ class AuthorizationCode
     /**
      * Get expires
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getExpires()
     {
@@ -130,7 +175,7 @@ class AuthorizationCode
     /**
      * Get scope
      *
-     * @return string 
+     * @return string
      */
     public function getScope()
     {
@@ -153,7 +198,7 @@ class AuthorizationCode
     /**
      * Get idToken
      *
-     * @return string 
+     * @return string
      */
     public function getIdToken()
     {
@@ -163,7 +208,7 @@ class AuthorizationCode
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -186,7 +231,7 @@ class AuthorizationCode
     /**
      * Get client
      *
-     * @return \ZF\OAuth2\Entity\Client 
+     * @return \ZF\OAuth2\Entity\Client
      */
     public function getClient()
     {

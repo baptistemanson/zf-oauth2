@@ -511,21 +511,33 @@ class DoctrineAdapter implements
      */
     public function getAuthorizationCode($code) {
         $config = $this->getConfig();
-        $doctrineAuthorizationCode = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['authorization_code']['name'];
 
-        $authorizationCode = $this->getObjectManager()
-            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['entity'])
-            ->findOneBy(
-                array(
-                    $doctrineAuthorizationCode => $code,
-                )
-            );
+        $doctrineAuthorizationCode = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['authorization_code']['name'];
+        $doctrineExpiresField = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['expires']['name'];
+
+        $queryBuilder = $this->getObjectManager()->createQueryBuilder();
+        $queryBuilder->select('authorizationCode')
+            ->from($config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['entity'], 'authorizationCode')
+            ->andwhere("authorizationCode.$doctrineAuthorizationCode = :code")
+            ->andwhere("authorizationCode.$doctrineExpiresField > :now")
+            ->setParameter('code', $code)
+            ->setParameter('now', new DateTime())
+            ;
+
+        try {
+            $authorizationCode = $queryBuilder->getQuery()->getSingleResult();
+        } catch (Exception $e) {
+            $authorizationCode = null;
+        }
 
         if ($authorizationCode) {
             $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\AuthorizationCode')->reset();
             $mapper->exchangeDoctrineArray($authorizationCode->getArrayCopy());
 
-            return $mapper->getOAuth2ArrayCopy();
+            $authorizationCodeClientAssertion = new \ZF\OAuth2\ClientAssertionType\AuthorizationCode();;
+            $authorizationCodeClientAssertion->exchangeArray($mapper->getOAuth2ArrayCopy());
+
+            return $authorizationCodeClientAssertion;
         } else {
             return null;
         }
@@ -585,13 +597,13 @@ class DoctrineAdapter implements
             'authorization_code' => $code,
             'client_id' => $client_id,
 #            'user_id' => $user_id,
-            'redirect_url' => $redirect_url,
+            'redirect_uri' => $redirect_uri,
             'expires' => $expires,
             'scope' => $scope,
             'id_token' => $id_token,
         ));
 
-        $accessToken->exchangeArray($mapper->getDoctrineArrayCopy());
+        $authorizationCode->exchangeArray($mapper->getDoctrineArrayCopy());
 
         $this->getObjectManager()->flush();
 
