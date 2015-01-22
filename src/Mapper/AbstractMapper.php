@@ -1,6 +1,6 @@
 <?php
 
-namespace OAuth2\Mapper;
+namespace ZF\OAuth2\Mapper;
 
 use DoctrineModule\Persistence\ObjectManagerAwareInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -33,6 +33,8 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
     {
         $this->oauth2Data = array();
         $this->doctrineData = array();
+
+        return $this;
     }
 
     /**
@@ -88,17 +90,6 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
      public function setConfig(array $config)
      {
         $this->config = $config;
-        $oAuth2Data= array();
-        $doctrineData = array();
-
-        foreach ($this->getConfig() as $field => $fieldConfig) {
-            $oAuth2Data[$field] = null;
-            $doctrineData[$fieldConfig['name']] = null;
-        }
-
-        // Reset the data array
-        $this->setOAuth2Data($oAuth2Data);
-        $this->setDoctrineData($doctrineData);
 
         return $this;
      }
@@ -124,42 +115,38 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
         $config = $this->getConfig();
 
         foreach ($array as $key => $value) {
-            if (!in_array(array_keys($this->getData()))) {
-                continue;
-            }
-
-            switch ($config[$key]['type']) {
+            switch ($config['mapping'][$key]['type']) {
                 // Set the value in data
                 case 'field':
-                    switch ($config[$key]['datatype']) {
+                    switch ($config['mapping'][$key]['datatype']) {
                         case 'datetime':
                             // Dates coming from OAuth2 are timestamps
                             $oAuth2Data[$key] = $value;
-                            $doctrineData[$config[$key]['name']] = DateTime::setTimestamp($value);
+                            $doctrineData[$config['mapping'][$key]['name']] = DateTime::setTimestamp($value);
                             break;
                         case 'boolean':
                             $oAuth2Data[$key] = (int) (bool) $value;
-                            $doctrineData[$config[$key]['name']] = (bool) $value;
+                            $doctrineData[$config['mapping'][$key]['name']] = (bool) $value;
                             break;
                         default:
                             $oAuth2Data[$key] = $value;
-                            $doctrineData[$config[$key]['name']] = $value;
+                            $doctrineData[$config['mapping'][$key]['name']] = $value;
                             break;
                     }
                     break;
                 // Find the relation for the given value and assign to data
                 case 'relation':
-                    $relation = $this->getObjectManager()->getRepository($config[$key]['entity'])
+                    $relation = $this->getObjectManager()->getRepository($config['mapping'][$key]['entity'])
                         ->findOneBy(array(
-                            $config[$key]['entity_field_name'] => $value,
+                            $config['mapping'][$key]['entity_field_name'] => $value,
                         ));
 
                     if (!$relation) {
-                        throw new Exception('Relation was not found: ' . $value);
+                        throw new Exception("Relation was not found: $key: $value");
                     }
 
                     $oAuth2Data[$key] = ($relation) ? $value: $relation;
-                    $doctrineData[$config[$key]['name']] = $relation;
+                    $doctrineData[$config['mapping'][$key]['name']] = $relation;
                     break;
                 default:
                     break;
@@ -184,53 +171,49 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
         $config = $this->getConfig();
 
         foreach ($array as $doctrineKey => $value) {
-            if (!in_array(array_keys($this->getData()))) {
-                continue;
-            }
-
             // Find the field config key from doctrine field name
-            $key = array();
-            foreach ($config as $mapper => $mapperConfig) {
-                foreach ($mapperConfig['mapping'] as $oauth2FieldName => $oauth2config) {
-                    if ($oauth2Config['name'] == $doctrineKey) {
-                        $key = $oauth2FieldName;
-                        break;
-                    }
-                }
-                if ($key) {
+            $key = '';
+
+            foreach ($config['mapping'] as $oAuth2FieldName => $oAuth2Config) {
+                if ($oAuth2Config['name'] == $doctrineKey) {
+                    $key = $oAuth2FieldName;
                     break;
                 }
             }
 
-            switch ($config[$key]['type']) {
+            if (!$key) {
+                continue;
+            }
+
+            switch ($config['mapping'][$key]['type']) {
                 // Set the value in data
                 case 'field':
-                    switch ($config[$key]['datatype']) {
+                    switch ($config['mapping'][$key]['datatype']) {
                         case 'datetime':
                             // Dates coming from Doctrine are datetimes
                             $oAuth2Data[$key] = $value->format('U');
-                            $doctrineData[$config[$key]['name']] = $value;
+                            $doctrineData[$config['mapping'][$key]['name']] = $value;
                             break;
                         case 'boolean':
                             $oAuth2Data[$key] = (int) $value;
-                            $doctrineData[$config[$key]['name']] = (bool) $value;
+                            $doctrineData[$config['mapping'][$key]['name']] = (bool) $value;
                             break;
                         default:
                             $oAuth2Data[$key] = $value;
-                            $doctrineData[$config[$key]['name']] = $value;
+                            $doctrineData[$config['mapping'][$key]['name']] = $value;
                             break;
                     }
                     break;
                 // Find the relation for the given value and assign to data
                 case 'relation':
-                    $entity = $config[$key]['entity'];
+                    $entity = $config['mapping'][$key]['entity'];
 
                     if ($value instanceof $entity) {
                         $relation = value;
                     } else {
-                        $relation = $this->getObjectManager()->getRepository($config[$key]['entity'])
+                        $relation = $this->getObjectManager()->getRepository($config['mapping'][$key]['entity'])
                             ->findOneBy(array(
-                                $config[$key]['entity_field_name'] => $value,
+                                $config['mapping'][$key]['entity_field_name'] => $value,
                             ));
                     }
 
@@ -240,13 +223,12 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
 
                     $relationArrayCopy = $relation->getArrayCopy();
 
-                    $oAuth2Data[$key] = $relationArrayCopy[$config[$key]['name']];
-                    $doctrineData[$config[$key]['name']] = $relation;
+                    $oAuth2Data[$key] = $relationArrayCopy[$config['mapping'][$key]['name']];
+                    $doctrineData[$config['mapping'][$key]['name']] = $relation;
                     break;
                 default:
                     break;
             }
-
         }
 
         $this->setOAuth2Data($oAuth2Data);

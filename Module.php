@@ -6,11 +6,27 @@
 
 namespace ZF\OAuth2;
 
+use Doctrine\ORM\Mapping\Driver\XmlDriver;
+
 /**
  * ZF2 module
  */
 class Module
 {
+    public function onBootstrap($e)
+    {
+        $app     = $e->getParam('application');
+        $sm      = $app->getServiceManager();
+        $config = $sm->get('Config');
+
+        // Add the default entity driver only if specified in configuration
+        if (isset($config['zf-oauth2']['storage_settings']['enable_default_entities'])
+            && $config['zf-oauth2']['storage_settings']['enable_default_entities']) {
+            $chain = $sm->get($config['zf-oauth2']['storage_settings']['driver']);
+            $chain->addDriver(new XmlDriver(__DIR__ . '/config/xml'), 'ZF\OAuth2\Entity');
+        }
+    }
+
     /**
      * Retrieve autoloader configuration
      *

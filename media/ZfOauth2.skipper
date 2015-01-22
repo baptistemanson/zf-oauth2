@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <skipper version="3.0.0.1104" name="zf-oauth2" mvc="Without MVC" orm="Doctrine2" uuid="b7638313-3ca8-4389-9163-d2bb1c15f725">
-  <module name="ZF OAuth2" uuid="e33a902b-9096-46f4-81af-cb8fa813a736">
+  <module name="ZF OAuth2" import-format="Doctrine2Xml" import-path="../config/xml" uuid="e33a902b-9096-46f4-81af-cb8fa813a736">
     <entity name="User" uuid="7103834d-0fe7-4345-9f6e-0e5ef1f651a4">
       <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="f51bece7-2323-4e19-a13b-adda319c9d96"/>
       <field name="username" type="string" uuid="57457700-b3a0-48c0-9940-d9c4a5bf4c93"/>
@@ -10,10 +10,11 @@
     </entity>
     <entity name="Client" uuid="0e40a98d-82ec-47f1-acc0-649982b1c48a">
       <field name="id" type="integer" required="true" unique="true" primary="true" auto-increment="true" uuid="f24288d3-c5ab-4e4f-a251-0bca949873d1"/>
+      <field name="clientId" type="string" uuid="5902288a-0d1f-44c0-a02c-19bc92de37b1"/>
       <field name="secret" type="string" uuid="1b0c7264-2fce-4217-9011-ddc42ee9afd2"/>
       <field name="redirectUri" type="text" uuid="e419d490-b93f-4a8b-b21b-03f3fc6a75ae"/>
       <field name="grantType" type="string" uuid="475c289c-1057-4314-a146-955108acb56a"/>
-      <field name="scope" type="text" uuid="9131a4c2-1f02-4ceb-9951-38fc30d8c245"/>
+      <field name="clientScope" type="text" uuid="9131a4c2-1f02-4ceb-9951-38fc30d8c245"/>
       <field name="user_id" type="integer" uuid="5eb7745e-9480-41ab-b124-c65aa92fbe98"/>
     </entity>
     <association from="Client" to="User" owner-alias="client" inverse-alias="user" uuid="450f3d3b-750e-4fe3-bc1c-eba7d5ad3009">
@@ -92,7 +93,7 @@
       <association-field from="client_id" to="id"/>
     </association>
     <orm-attributes>
-      <attribute name="namespace">OAuth2\Entity</attribute>
+      <attribute name="namespace">ZF\OAuth2\Entity</attribute>
     </orm-attributes>
   </module>
   <visual-data>
@@ -105,15 +106,15 @@
     <association uuid="450f3d3b-750e-4fe3-bc1c-eba7d5ad3009" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
     <association uuid="63fa8d9d-3bcf-461a-afd8-9aefba3c80f7" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
     <association uuid="6b2ceec2-f65b-4944-be20-613a797e5829" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
-    <entity uuid="7103834d-0fe7-4345-9f6e-0e5ef1f651a4" bg-color="4294967295" hdr-color="4292006610" position-x="47" position-y="14" size-x="0" size-x2="94" size-y="0" size-y2="87"/>
-    <entity uuid="8c75fc92-0e0a-43ed-b5dc-5859aba057ae" bg-color="4294967295" hdr-color="4292006610" position-x="456" position-y="136" size-x="0" size-x2="106" size-y="0" size-y2="87"/>
+    <entity uuid="7103834d-0fe7-4345-9f6e-0e5ef1f651a4" bg-color="4294967295" hdr-color="4292006610" position-x="154" position-y="8" size-x="0" size-x2="94" size-y="0" size-y2="87"/>
+    <entity uuid="8c75fc92-0e0a-43ed-b5dc-5859aba057ae" bg-color="4294967295" hdr-color="4292006610" position-x="531" position-y="120" size-x="0" size-x2="106" size-y="0" size-y2="87"/>
     <entity uuid="8cc40580-9611-471f-a6c7-9a64ec3b2869" bg-color="4294967295" hdr-color="4292006610" position-x="325" position-y="346" size-x="0" size-x2="99" size-y="0" size-y2="87"/>
-    <entity uuid="9c143447-a1f4-4187-a5f9-45e768f78ebb" bg-color="4294967295" hdr-color="4292006610" position-x="47" position-y="125" size-x="0" size-x2="93" size-y="0" size-y2="73"/>
+    <entity uuid="9c143447-a1f4-4187-a5f9-45e768f78ebb" bg-color="4294967295" hdr-color="4292006610" position-x="35" position-y="113" size-x="0" size-x2="93" size-y="0" size-y2="73"/>
     <association uuid="9daca6d8-8f09-4f97-bbfd-6db05bdf3e58" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
-    <entity uuid="b6562bcc-4fca-413e-a560-91da4d75dc9f" bg-color="4294967295" hdr-color="4292006610" position-x="139" position-y="345" size-x="0" size-x2="134" size-y="0" size-y2="87"/>
+    <entity uuid="b6562bcc-4fca-413e-a560-91da4d75dc9f" bg-color="4294967295" hdr-color="4292006610" position-x="143" position-y="379" size-x="0" size-x2="134" size-y="0" size-y2="87"/>
     <project uuid="b7638313-3ca8-4389-9163-d2bb1c15f725" size-x="0" size-x2="753" size-y="0" size-y2="719"/>
     <association uuid="d9c8b226-5b7a-4991-adb8-f01509ffdc87" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
     <module uuid="e33a902b-9096-46f4-81af-cb8fa813a736" bg-color="4294959018" position-x="61" position-y="72" size-x="11" size-x2="655" size-y="22" size-y2="601"/>
-    <entity uuid="f42aa952-941d-4cec-adaf-5df5bc023867" bg-color="4294967295" hdr-color="4292006610" position-x="44" position-y="210" size-x="0" size-x2="96" size-y="0" size-y2="101"/>
+    <entity uuid="f42aa952-941d-4cec-adaf-5df5bc023867" bg-color="4294967295" hdr-color="4292006610" position-x="86" position-y="232" size-x="0" size-x2="96" size-y="0" size-y2="101"/>
   </visual-data>
 </skipper>

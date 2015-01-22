@@ -47,8 +47,8 @@ class DoctrineMapperFactory implements AbstractFactoryInterface
         // Validate object is set
         $config = $serviceLocator->get('Config');
 
-        if (!isset($config['zf-oauth2']['storage_settings']['mapper'])
-            || !isset($config['zf-oauth2']['storage_settings']['mapper'][$requestedName])
+        if (!isset($config['zf-oauth2']['storage_settings']['mapping'])
+            || !isset($config['zf-oauth2']['storage_settings']['mapping'][$requestedName])
         ) {
             $this->lookupCache[$requestedName] = false;
 
@@ -58,6 +58,7 @@ class DoctrineMapperFactory implements AbstractFactoryInterface
         // Validate if class a valid Mapper
         $className = $requestedName;
         $className = $this->normalizeClassname($className);
+
         $reflection = new \ReflectionClass($className);
         if (!$reflection->isSubclassOf('\ZF\OAuth2\Mapper\AbstractMapper')) {
             // @codeCoverageIgnoreStart
@@ -107,7 +108,7 @@ class DoctrineMapperFactory implements AbstractFactoryInterface
         $className = $requestedName;
         $className = $this->normalizeClassname($className);
 
-        $objectManager = $this->loadObjectManager($serviceLocator, $config['zf-oauth2']['storage_settings']);
+        $objectManager = $this->loadObjectManager($serviceLocator, $config);
 
         $mapper = new $className();
         $mapper->setObjectManager($objectManager);
@@ -135,8 +136,8 @@ class DoctrineMapperFactory implements AbstractFactoryInterface
      */
     protected function loadObjectManager(ServiceLocatorInterface $serviceLocator, $config)
     {
-        if ($serviceLocator->has($config['object_manager'])) {
-            $objectManager = $serviceLocator->get($config['object_manager']);
+        if ($serviceLocator->has($config['zf-oauth2']['storage_settings']['object_manager'])) {
+            $objectManager = $serviceLocator->get($config['zf-oauth2']['storage_settings']['object_manager']);
         } else {
             // @codeCoverageIgnoreStart
             throw new ServiceNotCreatedException('The object_manager could not be found.');
