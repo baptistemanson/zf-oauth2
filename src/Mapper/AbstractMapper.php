@@ -148,11 +148,21 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                         ));
 
                     if (!$relation) {
-                        throw new Exception("Relation was not found: $key: $value");
+                        if (isset($config['mapping'][$key]['allowNull']) && $config['mapping'][$key]['allowNull']) {
+
+                        } else {
+                            throw new Exception("Relation was not found: $key: $value");
+                        }
                     }
 
-                    $oAuth2Data[$key] = $value;
-                    $doctrineData[$config['mapping'][$key]['name']] = $relation;
+                    if ($relation) {
+                        $oAuth2Data[$key] = $value;
+                        $doctrineData[$config['mapping'][$key]['name']] = $relation;
+                    } else {
+                        $oAuth2Data[$key] = null;
+                        $doctrineData[$config['mapping'][$key]['name']] = null;
+                    }
+
                     break;
                 default:
                     break;
@@ -224,13 +234,21 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                     }
 
                     if (!$relation) {
-                        throw new Exception('Relation was not found: ' . $value);
+                        if (isset($config['mapping'][$key]['allowNull']) && $config['mapping'][$key]['allowNull']) {
+
+                        } else {
+                            throw new Exception("Relation was not found: $key: $value");
+                        }
                     }
 
-                    $relationArrayCopy = $relation->getArrayCopy();
-
-                    $oAuth2Data[$key] = $relationArrayCopy[$config['mapping'][$key]['name']];
-                    $doctrineData[$config['mapping'][$key]['name']] = $relation;
+                    if ($relation) {
+                        $relationArrayCopy = $relation->getArrayCopy();
+                        $oAuth2Data[$key] = $relationArrayCopy[$config['mapping'][$key]['name']];
+                        $doctrineData[$config['mapping'][$key]['name']] = $relation;
+                    } else {
+                        $oAuth2Data[$key] = null;
+                        $doctrineData[$config['mapping'][$key]['name']] = null;
+                    }
                     break;
                 default:
                     break;

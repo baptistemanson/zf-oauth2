@@ -510,11 +510,25 @@ class DoctrineAdapter implements
      * @ingroup oauth2_section_4
      */
     public function getAuthorizationCode($code) {
-        $authorizationCode = $this->getObjectManager()
-            ->getRepository($this->config['authorization_code_entity'])
-            ->find($code);
+        $config = $this->getConfig();
+        $doctrineAuthorizationCode = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['authorization_code']['name'];
 
-        return ($authorizationCode) ? $authorizationCode->toArray(): null;
+        $authorizationCode = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineAuthorizationCode => $code,
+                )
+            );
+
+        if ($authorizationCode) {
+            $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\AuthorizationCode')->reset();
+            $mapper->exchangeDoctrineArray($authorizationCode->getArrayCopy());
+
+            return $mapper->getOAuth2ArrayCopy();
+        } else {
+            return null;
+        }
     }
 
     /* OAuth2\Storage\AuthorizationCodeInterface */
@@ -547,24 +561,37 @@ class DoctrineAdapter implements
         $scope = null,
         $id_token = null)
     {
+
+        $config = $this->getConfig();
+        $doctrineAuthorizationCodeField = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['authorization_code']['name'];
+
         $authorizationCode = $this->getObjectManager()
-            ->getRepository($this->config['authorization_code_entity'])
-            ->find($code);
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineAuthorizationCodeField => $code,
+                )
+            );
 
         if (!$authorizationCode) {
-            $authorizationCode = new $this->config['authorization_code_entity'];
-            $authorizationCode->setAuthorizationCode($code);
+            $entityClass = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['entity'];
+
+            $authorizationCode= new $entityClass;
             $this->getObjectManager()->persist($authorizationCode);
         }
 
-        $authorizationCode->exchangeArray(array(
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\AuthorizationCode')->reset();
+        $mapper->exchangeOAuth2Array(array(
+            'authorization_code' => $code,
             'client_id' => $client_id,
-            'user_id' => $user_id,
-            'redirect_uri' => $redirect_uri,
+#            'user_id' => $user_id,
+            'redirect_url' => $redirect_url,
             'expires' => $expires,
             'scope' => $scope,
             'id_token' => $id_token,
         ));
+
+        $accessToken->exchangeArray($mapper->getDoctrineArrayCopy());
 
         $this->getObjectManager()->flush();
 
@@ -586,12 +613,23 @@ class DoctrineAdapter implements
      */
     public function expireAuthorizationCode($code)
     {
+        $config = $this->getConfig();
+        $doctrineAuthorizationCodeField = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['authorization_code']['name'];
+
         $authorizationCode = $this->getObjectManager()
-            ->getRepository($this->config['authorization_code_entity'])
-            ->find($code);
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineAuthorizationCodeField => $code,
+                )
+            );
 
         if ($authorizationCode) {
-            $this->getObjectManager()->remove($authorizationCode);
+            $doctrineExpiresField = $config['mapping']['ZF\OAuth2\Mapper\AuthorizationCode']['mapping']['expires']['name'];
+            $authorizationCode->exchangeArray(array(
+                $doctrineExpiresField => new DateTime(), # maybe subtract 1 second?
+            ));
+
             $this->getObjectManager()->flush();
         }
 
@@ -624,12 +662,22 @@ class DoctrineAdapter implements
      */
     public function checkUserCredentials($username, $password)
     {
+        $config = $this->getConfig();
+        $doctrineUsernameField = $config['mapping']['ZF\OAuth2\Mapper\User']['mapping']['username']['name'];
+
         $user = $this->getObjectManager()
-            ->getRepository($this->config['user_entity'])
-            ->findOneBy(array('username' => $username));
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\User']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineUsernameField => $username,
+                )
+            );
 
         if ($user) {
-            return $this->checkPassword($user, $password);
+            $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\User')->reset();
+            $mapper->exchangeDoctrineArray($user->getArrayCopy());
+
+            return $this->checkPassword($mapper->getOAuth2ArrayCopy(), $password);
         }
 
         return false;
@@ -650,11 +698,25 @@ class DoctrineAdapter implements
      */
     public function getUserDetails($username)
     {
-        $user = $this->getObjectManager()
-            ->getRepository($this->config['user_entity'])
-            ->findOneBy(array('username' => $username));
+        $config = $this->getConfig();
+        $doctrineUsernameField = $config['mapping']['ZF\OAuth2\Mapper\User']['mapping']['username']['name'];
 
-        return ($user) ? $user->getArrayCopy(): null;
+        $user = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\User']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineUsernameField => $username,
+                )
+            );
+
+        if ($user) {
+            $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\User')->reset();
+            $mapper->exchangeDoctrineArray($user->getArrayCopy());
+
+            return $mapper->getOAuth2ArrayCopy();
+        }
+
+        return null;
     }
 
 
@@ -731,16 +793,29 @@ class DoctrineAdapter implements
     # If expired return null
     public function getRefreshToken($refresh_token)
     {
-        $refreshToken = $this->getObjectManager()
-            ->getRepository($this->config['refresh_token_entity'])
-            ->findOneBy(array('refresh_token' => $refresh_token));
+        $config = $this->getConfig();
+        $doctrineRefreshTokenField = $config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['mapping']['refresh_token']['name'];
+        $doctrineExpiresField = $config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['mapping']['expires']['name'];
 
-        $now = new DateTime();
-        if (!$refreshToken || $refreshToken->getExpire() >= $now) {
-            return null;
+        $queryBuilder = $this->getObjectManager()->createQueryBuilder();
+        $queryBuilder->select('refreshToken')
+            ->from($config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['entity'], 'refreshToken')
+            ->andwhere("$doctrineRefreshTokenField = :token")
+            ->andwhere("$doctrineExpiresField > :now")
+            ->setParameter('token', $refresh_token)
+            ->setParameter('now', new DateTime())
+            ;
+
+        $refreshToken = $queryBuilder->getQuery()->getSingleResult();
+
+        if ($refreshToken) {
+            $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\RefreshToken')->reset();
+            $mapper->exchangeDoctrineArray($refreshToken->getArrayCopy());
+
+            return $mapper->getOAuth2ArrayCopy();
         }
 
-        return $refreshToken->getArrayCopy();
+        return null;
     }
 
     /* OAuth2\Storage\RefreshTokenInterface */
@@ -774,24 +849,34 @@ class DoctrineAdapter implements
         $expires,
         $scope = null)
     {
-        $refreshToken = $this->getObjectManager()
-            ->getRepository($this->config['refresh_token_entity'])
-            ->findOneBy(array('refresh_token' => $refresh_token));
+        $config = $this->getConfig();
+        $doctrineRefreshTokenField = $config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['mapping']['refresh_token']['name'];
+
+        $refreshToken= $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineRefreshTokenField => $refresh_token,
+                )
+            );
 
         if (!$refreshToken) {
-            $refreshToken = new $this->config['refresh_token_entity'];
-            $refreshToken->setRefreshToken($refresh_token);
+            $entityClass = $config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['entity'];
+
+            $refreshToken= new $entityClass;
             $this->getObjectManager()->persist($refreshToken);
         }
 
-        $expires = DateTime::setTimestamp($expires);
-
-        $refreshToken->exchangeArray(array(
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\RefreshToken')->reset();
+        $mapper->exchangeOAuth2Array(array(
+            'refresh_token' => $refresh_token,
             'client_id' => $client_id,
             'user_id' => $user_id,
             'expires' => $expires,
             'scope' => $scope,
         ));
+
+        $refreshToken->exchangeArray($mapper->getDoctrineArrayCopy());
 
         $this->getObjectManager()->flush();
 
@@ -817,12 +902,23 @@ class DoctrineAdapter implements
      */
     public function unsetRefreshToken($refresh_token)
     {
-        $refreshToken = $this->getObjectManager()
-            ->getRepository($this->config['refresh_token_entity'])
-            ->findOneBy(array('refresh_token' => $refresh_token));
+        $config = $this->getConfig();
+        $doctrineRefreshTokenCodeField = $config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['mapping']['refresh_token']['name'];
 
-        if ($refreshToken) {
-            $refreshToken->setExpire(new DateTime());
+        $refreshToken = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineRefreshTokenCodeField => $refresh_token,
+                )
+            );
+
+        if ($refreshToken ) {
+            $doctrineExpiresField = $config['mapping']['ZF\OAuth2\Mapper\RefreshToken']['mapping']['expires']['name'];
+            $refreshToken ->exchangeArray(array(
+                $doctrineExpiresField => new DateTime(), # maybe subtract 1 second?
+            ));
+
             $this->getObjectManager()->flush();
         }
 
@@ -841,11 +937,12 @@ class DoctrineAdapter implements
      */
     public function scopeExists($scope)
     {
+        $config = $this->getConfig();
         $whereIn = implode(',', array_fill(0, count($scope), '?'));
 
         $queryBuilder = $this->getObjectManager()->createQueryBuilder()
             ->select('scope')
-            ->from($this->config['scope_entity'], 'scope')
+            ->from($config['mapping']['ZF\OAuth2\Mapper\Scope']['entity'], 'scope')
             ->andwhere(
                 $queryBuilder->expr()->in('scope.scope', $scopeArray)
             )
@@ -880,7 +977,6 @@ class DoctrineAdapter implements
      # client_id is not used?
     public function getDefaultScope($client_id = null)
     {
-
         $config = $this->getConfig();
         $doctrineScopeIsDefaultField = $config['mapping']['ZF\OAuth2\Mapper\Scope']['mapping']['is_default']['name'];
 
@@ -917,14 +1013,28 @@ class DoctrineAdapter implements
      */
     public function getClientKey($client_id, $subject)
     {
-        $scope = $this->getObjectManager()
-            ->getRepository($this->config['jwt_entity'])
-            ->findOneBy(array(
-                'client_id' => $client_id,
-                'subject' => $subject,
-            ));
+        $config = $this->getConfig();
+        $doctrineClientIdField = $config['mapping']['ZF\OAuth2\Mapper\Jwt']['mapping']['client_id']['name'];
+        $doctrineSubjectField = $config['mapping']['ZF\OAuth2\Mapper\Jwt']['mapping']['subject']['name'];
 
-        return ($scope) ? $scope->getPublicKey(): false;
+        $jwt = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\Jwt']['entity'])
+            ->findBy(
+                array(
+                    $doctrineClientIdField => $client_id,
+                    $doctrineSubjectField => $subject,
+                )
+            );
+
+        if (!$jwt) {
+            return false;
+        }
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\Jwt')->reset();
+        $mapper->exchangeDoctrineArray($jwt->getArrayCopy());
+        $data = $mapper->getOAuth2ArrayCopy();
+
+        return ($data['public_key']) ?: false;
     }
 
     /* OAuth2\Storage\JwtBearerInterface */
@@ -960,19 +1070,47 @@ class DoctrineAdapter implements
         $expiration,
         $jti)
     {
-        $expiration = DateTime::setTimestamp($expiration);
+        $config = $this->getConfig();
+        $doctrineClientIdField = $config['mapping']['ZF\OAuth2\Mapper\Jti']['mapping']['client_id']['name'];
+        $doctrineSubjectField = $config['mapping']['ZF\OAuth2\Mapper\Jti']['mapping']['subject']['name'];
+        $doctrineAudienceField = $config['mapping']['ZF\OAuth2\Mapper\Jti']['mapping']['audience']['name'];
+        $doctrineExpirationField = $config['mapping']['ZF\OAuth2\Mapper\Jti']['mapping']['expiration']['name'];
+        $doctrineJtiField = $config['mapping']['ZF\OAuth2\Mapper\Jti']['mapping']['jti']['name'];
 
-        $jtiEntity = $this->getObjectManager()
-            ->getRepository($this->config['jwt_entity'])
-            ->findOneBy(array(
-                'issuer' => $client_id,
-                'subject' => $subject,
-                'audience' => $audience,
-                'expires' => $expiration,
-                'jti' => $jti
-            ));
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\Jti')->reset();
+        $mapper->exchangeOAuth2Array(array(
+            'client_id' => $client_id,
+            'subject' => $subject,
+            'audience' => $audience,
+            'expiration' => $expiration,
+            'jti' => $jti,
+        ));
 
-        return ($jtiEntity) ? $jtiEntity->getArrayCopy(): null;
+        // Fetch doctrine array and filter for parameter values
+        $query = $mapper->getDoctrineArrayCopy();
+        foreach ($query as $field => $value) {
+            if (!in_array($field, array(
+                $doctrineClientIdField,
+                $doctrineSubjectField,
+                $doctrineAudienceField,
+                $doctrineExpirationField,
+                $doctrineJtiField,
+            ))) {
+                unset($query[$field]);
+            }
+        }
+
+        $jti= $this->getQueryBuilder()->getRepository($config['mapping']['ZF\OAuth2\Mapper\Jti']['entity'])
+                ->findOneBy($query);
+
+        if (!$jti) {
+            return null;
+        }
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\Jti')->reset();
+        $mapper->exchangeDoctrineArray($jti->getArrayCopy());
+
+        return $mapper->getOAuth2ArrayCopy();
     }
 
     /* OAuth2\Storage\JwtBearerInterface */
@@ -995,11 +1133,13 @@ class DoctrineAdapter implements
      */
     public function setJti($client_id, $subject, $audience, $expiration, $jti)
     {
-        $jtiEntity = new $this->config['jti_entity'];
+        $config = $this->getConfig();
+        $jtiEntity = $config['mapping']['ZF\OAuth2\Mapper\Jti']['entity'];
 
-        $expiration = DateTime::setTimestamp($expiration);
+        $jti = new $jtiEntity;
 
-        $jtiEntity->exchangeArray(array(
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\Jti')->reset();
+        $mapper->exchangeOAuth2Array(array(
             'client_id'  => $client_id,
             'subject'    => $subject,
             'audience'   => $audience,
@@ -1007,7 +1147,9 @@ class DoctrineAdapter implements
             'jti'        => $jti,
         ));
 
-        $this->getObjectManager()->persist($jtiEntity);
+        $jti->exchangeArray($mapper->getDoctrineArrayCopy());
+
+        $this->getObjectManager()->persist($jti);
         $this->getObjectManager()->flush();
 
         return true;
@@ -1016,30 +1158,78 @@ class DoctrineAdapter implements
     /* OAuth2\Storate\PublicKeyInterface */
     public function getPublicKey($client_id = null)
     {
-        $publicKey = $this->getObjectManager()
-            ->getRepository($this->config['public_key_entity'])
-            ->findOneBy(array('client_id' => $client_id));
+        $config = $this->getConfig();
+        $doctrineClientIdField = $config['mapping']['ZF\OAuth2\Mapper\PublicKey']['mapping']['client_id']['name'];
 
-        return $publicKey->getPublicKey();
+        $publicKey = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\PublicKey']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineClientIdField => $client_id,
+                )
+            );
+
+        if (!$publicKey) {
+            return null;
+        }
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\PublicKey')->reset();
+        $mapper->exchangeDoctrineArray($publicKey->getArrayCopy());
+
+        $publicKeyOAuth2 = $mapper->getOAuth2ArrayCopy();
+
+        return $publicKeyOAuth2['public_key'];
     }
 
     /* OAuth2\Storate\PublicKeyInterface */
     public function getPrivateKey($client_id = null)
     {
-        $publicKey = $this->getObjectManager()
-            ->getRepository($this->config['public_key_entity'])
-            ->findOneBy(array('client_id' => $client_id));
+        $config = $this->getConfig();
+        $doctrineClientIdField = $config['mapping']['ZF\OAuth2\Mapper\PublicKey']['mapping']['client_id']['name'];
 
-        return $publicKey->getPrivateKey();
+        $publicKey = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\PublicKey']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineClientIdField => $client_id,
+                )
+            );
+
+        if (!$publicKey) {
+            return null;
+        }
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\PublicKey')->reset();
+        $mapper->exchangeDoctrineArray($publicKey->getArrayCopy());
+
+        $publicKeyOAuth2 = $mapper->getOAuth2ArrayCopy();
+
+        return $publicKeyOAuth2['private_key'];
     }
 
     /* OAuth2\Storate\PublicKeyInterface */
     public function getEncryptionAlgorithm($client_id = null)
     {
-        $publicKey = $this->getObjectManager()
-            ->getRepository($this->config['public_key_entity'])
-            ->findOneBy(array('client_id' => $client_id));
+        $config = $this->getConfig();
+        $doctrineClientIdField = $config['mapping']['ZF\OAuth2\Mapper\PublicKey']['mapping']['client_id']['name'];
 
-        return ($publicKey) ? $publicKey->getEncryptionAlgorithm(): 'RS256';
+        $publicKey = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\PublicKey']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineClientIdField => $client_id,
+                )
+            );
+
+        if (!$publicKey) {
+            return null;
+        }
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\PublicKey')->reset();
+        $mapper->exchangeDoctrineArray($publicKey->getArrayCopy());
+
+        $publicKeyOAuth2 = $mapper->getOAuth2ArrayCopy();
+
+        return $publicKeyOAuth2['encryption_algorithm'];
     }
 }

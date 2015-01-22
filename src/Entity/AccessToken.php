@@ -54,6 +54,9 @@ class AccessToken implements ArraySerializableInterface
                 case 'scope':
                     $this->setScope($value);
                     break;
+                case 'client':
+                    $this->setClient($value);
+                    break;
                 default:
                     break;
            }

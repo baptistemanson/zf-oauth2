@@ -9,7 +9,7 @@
     <field name="isDefault" type="boolean" nullable="true"/>
     <many-to-one field="client" target-entity="ZF\OAuth2\Entity\Client" inversed-by="scope">
       <join-columns>
-        <join-column name="client_id" referenced-column-name="id"/>
+        <join-column name="client_id" referenced-column-name="id" nullable="false"/>
       </join-columns>
     </many-to-one>
   </entity>

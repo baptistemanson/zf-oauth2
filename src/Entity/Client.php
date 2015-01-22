@@ -103,6 +103,7 @@ class Client implements ArraySerializableInterface
             'redirectUri' => $this->getRedirectUri(),
             'grantType' => $this->getGrantType(),
             'clientScope' => $this->getClientScope(),
+            'user' => $this->getUser(),
         );
 
         #FIXME:  how to include user_id?
