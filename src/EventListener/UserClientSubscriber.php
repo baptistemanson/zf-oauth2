@@ -1,12 +1,16 @@
 <?php
 
+/**
+ * This doctrine event subscriber will join a user table to the client table
+ * thereby freeing the user table from the OAuth2 contraints
+ */
+
 namespace ZF\OAuth2\EventListener;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 
-// src/Acme/DemoBundle/EventListener/DynamicRelationSubscriber.php
 class UserClientSubscriber implements EventSubscriber
 {
     protected $config = array();

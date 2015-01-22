@@ -476,7 +476,7 @@ class Client implements ArraySerializableInterface
      * @param \ZF\OAuth2\Entity\User $user
      * @return Client
      */
-    public function setUser(\ZF\OAuth2\Entity\User $user = null)
+    public function setUser($user = null)
     {
         $this->user = $user;
 

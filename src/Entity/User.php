@@ -193,7 +193,7 @@ class User implements ArraySerializableInterface
      * @param \ZF\OAuth2\Entity\Client $client
      * @return User
      */
-    public function addClient(\ZF\OAuth2\Entity\Client $client)
+    public function addClient($client)
     {
         $this->client[] = $client;
 
@@ -203,9 +203,9 @@ class User implements ArraySerializableInterface
     /**
      * Remove client
      *
-     * @param \ZF\OAuth2\Entity\Client $client
+     * @param $client
      */
-    public function removeClient(\ZF\OAuth2\Entity\Client $client)
+    public function removeClient($client)
     {
         $this->client->removeElement($client);
     }
