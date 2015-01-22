@@ -226,6 +226,9 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
 
                     if ($value instanceof $entity) {
                         $relation = $value;
+                        $doctrineArray = $relation->getArrayCopy();
+                        $oAuth2Value = $doctrineArray[$config['mapping'][$key]['entity_field_name']];
+
                     } else {
                         $relation = $this->getObjectManager()->getRepository($config['mapping'][$key]['entity'])
                             ->findOneBy(array(
@@ -242,7 +245,7 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                     }
 
                     if ($relation) {
-                        $oAuth2Data[$key] = $value;
+                        $oAuth2Data[$key] = $oAuth2Value;
                         $doctrineData[$config['mapping'][$key]['name']] = $relation;
                     } else {
                         $oAuth2Data[$key] = null;

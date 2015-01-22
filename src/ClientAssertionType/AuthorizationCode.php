@@ -42,6 +42,7 @@ class AuthorizationCode implements ArrayAccess, ClientAssertionTypeInterface
 
     public function getAuthorizationCode()
     {
+        die('get auth code ' . $this->authorization_code);
         return $this->authorization_code;
     }
 

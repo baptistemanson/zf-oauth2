@@ -3,11 +3,12 @@
 namespace ZF\OAuth2\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Zend\Stdlib\ArraySerializableInterface;
 
 /**
  * RefreshToken
  */
-class RefreshToken
+class RefreshToken implements ArraySerializableInterface
 {
     /**
      * @var string
@@ -34,6 +35,42 @@ class RefreshToken
      */
     private $client;
 
+    public function exchangeArray(array $array)
+    {
+        foreach ($array as $key => $value) {
+            $key = strtolower($key);
+            $key = str_replace('_', '', $key);
+            switch ($key) {
+                case 'refreshtoken':
+                    $this->setRefreshToken($value);
+                    break;
+                case 'expires':
+                    $this->setExpires($value);
+                    break;
+                case 'scope':
+                    $this->setScope($value);
+                    break;
+                case 'client':
+                    $this->setClient($value);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return $this;
+    }
+
+    public function getArrayCopy()
+    {
+        return array(
+            'id' => $this->getId(),
+            'refreshToken' => $this->getRefreshToken(),
+            'expires' => $this->getExpires(),
+            'scope' => $this->getScope(),
+            'client' => $this->getClient(),
+        );
+    }
 
     /**
      * Set refreshToken
@@ -51,7 +88,7 @@ class RefreshToken
     /**
      * Get refreshToken
      *
-     * @return string 
+     * @return string
      */
     public function getRefreshToken()
     {
@@ -74,7 +111,7 @@ class RefreshToken
     /**
      * Get expires
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getExpires()
     {
@@ -97,7 +134,7 @@ class RefreshToken
     /**
      * Get scope
      *
-     * @return string 
+     * @return string
      */
     public function getScope()
     {
@@ -107,7 +144,7 @@ class RefreshToken
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -130,7 +167,7 @@ class RefreshToken
     /**
      * Get client
      *
-     * @return \ZF\OAuth2\Entity\Client 
+     * @return \ZF\OAuth2\Entity\Client
      */
     public function getClient()
     {
