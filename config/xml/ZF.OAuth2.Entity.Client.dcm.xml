@@ -9,11 +9,9 @@
     <field name="redirectUri" type="text" nullable="true"/>
     <field name="grantType" type="string" nullable="true"/>
     <field name="clientScope" type="text" nullable="true"/>
-    <many-to-one field="user" target-entity="ZF\OAuth2\Entity\User" inversed-by="client">
-      <join-columns>
-        <join-column name="user_id" referenced-column-name="id"/>
-      </join-columns>
-    </many-to-one>
+    <unique-constraints>
+      <unique-constraint name="idx_clientId_unique" columns="clientId"/>
+    </unique-constraints>
     <one-to-many field="accessToken" target-entity="ZF\OAuth2\Entity\AccessToken" mapped-by="client"/>
     <one-to-many field="refreshToken" target-entity="ZF\OAuth2\Entity\RefreshToken" mapped-by="client"/>
     <one-to-many field="authorizationCode" target-entity="ZF\OAuth2\Entity\AuthorizationCode" mapped-by="client"/>

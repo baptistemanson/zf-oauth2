@@ -728,7 +728,7 @@ class DoctrineAdapter implements
             return $mapper->getOAuth2ArrayCopy();
         }
 
-        return null;
+        return false;
     }
 
 
