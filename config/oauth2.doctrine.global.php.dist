@@ -5,13 +5,32 @@ return array(
         'storage' => 'ZF\OAuth2\Adapter\DoctrineAdapter',
         'storage_settings' => array(
             'object_manager' => 'doctrine.entitymanager.orm_default',
+            'event_manager' => 'doctrine.eventmanager.orm_default',
             'driver' => 'doctrine.driver.orm_default',
             'enable_default_entities' => true,
             'bcrypt_cost' => 14, # match zfcuser
+            // Dynamically map the user_entity to the client_entity
+            // Each entity should have getter and setter handling
+            // for the referenced fields
+            'dynamic_mapping' => array(
+                'user_entity' => array(
+                    'entity' => 'ZF\OAuth2\Entity\User',
+                    'field' => 'user',
+                ),
+                'client_entity' => array(
+                    'entity' => 'ZF\OAuth2\Entity\Client',
+                    'field' => 'client',
+                ),
+            ),
             'mapping' => array(
                 'ZF\OAuth2\Mapper\User' => array(
                     'entity' => 'ZF\OAuth2\Entity\User',
                     'mapping' => array(
+                        'user_id' => array(
+                            'type' => 'field',
+                            'name' => 'id',
+                            'datatype' => 'integer',
+                        ),
                         'username' => array(
                             'type' => 'field',
                             'name' => 'username',
@@ -20,16 +39,6 @@ return array(
                         'password' => array(
                             'type' => 'field',
                             'name' => 'password',
-                            'datatype' => 'string',
-                        ),
-                        'first_name' => array(
-                            'type' => 'field',
-                            'name' => 'firstName',
-                            'datatype' => 'string',
-                        ),
-                        'last_name' => array(
-                            'type' => 'field',
-                            'name' => 'lastName',
                             'datatype' => 'string',
                         ),
                     ),

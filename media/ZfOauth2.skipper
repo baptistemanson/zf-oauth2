@@ -6,7 +6,7 @@
       <field name="username" type="string" uuid="57457700-b3a0-48c0-9940-d9c4a5bf4c93"/>
       <field name="password" type="string" uuid="f59dce61-7d3b-4c0b-8a0b-4bc8e7893bc5"/>
       <orm-attributes>
-        <attribute name="table">OAuth2User</attribute>
+        <attribute name="table">oauth2_User</attribute>
       </orm-attributes>
     </entity>
     <entity name="Client" uuid="0e40a98d-82ec-47f1-acc0-649982b1c48a">
@@ -20,7 +20,7 @@
         <index-field name="clientId"/>
       </index>
       <orm-attributes>
-        <attribute name="table">OAuth2Client</attribute>
+        <attribute name="table">oauth2_Client</attribute>
       </orm-attributes>
     </entity>
     <entity name="AccessToken" uuid="0cef011b-fcdf-4e6e-a813-2a8d49ba4748">
@@ -30,7 +30,7 @@
       <field name="scope" type="text" uuid="1ba7a0b6-3b24-4c36-a4c4-b77eb1e3629a"/>
       <field name="client_id" type="integer" required="true" uuid="57674c7f-3b8f-4381-b9e4-dfe8d5eb8ca7"/>
       <orm-attributes>
-        <attribute name="table">OAuth2AccessToken</attribute>
+        <attribute name="table">oauth2_AccessToken</attribute>
       </orm-attributes>
     </entity>
     <association from="AccessToken" to="Client" owner-alias="accessToken" inverse-alias="client" uuid="d9c8b226-5b7a-4991-adb8-f01509ffdc87">
@@ -43,7 +43,7 @@
       <field name="scope" type="text" uuid="35312bb8-511a-476b-97ff-e6312296696f"/>
       <field name="client_id" type="integer" required="true" uuid="c0bb2d2f-f5d6-4232-953f-5b8e80025751"/>
       <orm-attributes>
-        <attribute name="table">OAuth2RefreshToken</attribute>
+        <attribute name="table">oauth2_RefreshToken</attribute>
       </orm-attributes>
     </entity>
     <association from="RefreshToken" to="Client" owner-alias="refreshToken" inverse-alias="client" uuid="3efa4b07-67d5-48a1-94e8-69ad2a5bc60e">
@@ -58,7 +58,7 @@
       <field name="idToken" type="text" uuid="0a5faae6-ad87-4aa6-bd17-325e84aa8961"/>
       <field name="client_id" type="integer" required="true" uuid="471392b9-dd08-420b-9e01-bb305836c9cc"/>
       <orm-attributes>
-        <attribute name="table">OAuth2AuthorizationCode</attribute>
+        <attribute name="table">oauth2_AuthorizationCode</attribute>
       </orm-attributes>
     </entity>
     <association from="AuthorizationCode" to="Client" owner-alias="authorizationCode" inverse-alias="client" uuid="2664c472-a222-4480-80e6-34943b78930f">
@@ -70,7 +70,7 @@
       <field name="publicKey" type="text" uuid="fd97023c-adb4-4715-9026-fa446ba12129"/>
       <field name="client_id" type="integer" required="true" uuid="508c578d-8f57-4c20-ab5e-3291cf6652cc"/>
       <orm-attributes>
-        <attribute name="table">OAuth2Jwt</attribute>
+        <attribute name="table">oauth2_Jwt</attribute>
       </orm-attributes>
     </entity>
     <association from="Jwt" to="Client" owner-alias="jwt" inverse-alias="client" uuid="6b2ceec2-f65b-4944-be20-613a797e5829">
@@ -84,7 +84,7 @@
       <field name="jti" type="text" uuid="07d4de52-147f-4355-b4bf-8948d258580c"/>
       <field name="client_id" type="integer" required="true" uuid="e016f63a-2812-4988-a728-d3ea46167da2"/>
       <orm-attributes>
-        <attribute name="table">OAuth2Jti</attribute>
+        <attribute name="table">oauth2_Jti</attribute>
       </orm-attributes>
     </entity>
     <association from="Jti" to="Client" owner-alias="jti" inverse-alias="client" uuid="1a897fc1-617e-4cc3-82b7-54f564d3335d">
@@ -97,7 +97,7 @@
       <field name="isDefault" type="boolean" uuid="944d76ea-159b-43fb-a182-5100908dfd7b"/>
       <field name="client_id" type="integer" required="true" uuid="f572c06d-8e96-4536-9590-a06db13145c9"/>
       <orm-attributes>
-        <attribute name="table">OAuth2Scope</attribute>
+        <attribute name="table">oauth2_Scope</attribute>
       </orm-attributes>
     </entity>
     <association from="Scope" to="Client" owner-alias="scope" inverse-alias="client" uuid="63fa8d9d-3bcf-461a-afd8-9aefba3c80f7">
@@ -110,7 +110,7 @@
       <field name="encryptionAlgorithm" type="string" uuid="83593e76-ad34-4103-b524-37898567ede8"/>
       <field name="client_id" type="integer" required="true" uuid="8bbf535b-14cb-432c-921f-c9cf693db8e2"/>
       <orm-attributes>
-        <attribute name="table">OAuth2PublicKey</attribute>
+        <attribute name="table">oauth2_PublicKey</attribute>
       </orm-attributes>
     </entity>
     <association from="PublicKey" to="Client" owner-alias="publicKey" inverse-alias="client" uuid="9daca6d8-8f09-4f97-bbfd-6db05bdf3e58">
