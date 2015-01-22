@@ -420,11 +420,26 @@ class DoctrineAdapter implements
      */
     public function getAccessToken($access_token)
     {
-        $accessToken = $this->getObjectManager()
-            ->getRepository($this->config['access_token_entity'])
-            ->find($access_token);
+        $config = $this->getConfig();
+        $doctrineAccessTokenField = $config['mapping']['ZF\OAuth2\Mapper\AccessToken']['mapping']['access_token']['name'];
 
-        return ($accessToken) ? $accessToken->toArray(): null;
+        $accessToken = $this->getObjectManager()
+            ->getRepository($config['mapping']['ZF\OAuth2\Mapper\AccessToken']['entity'])
+            ->findOneBy(
+                array(
+                    $doctrineAccessTokenField => $access_token,
+                )
+            );
+
+        if (!$accessToken) {
+            return false;
+        }
+
+        $mapper = $this->getServiceLocator()->get('ZF\OAuth2\Mapper\AccessToken')->reset();
+        $mapper->exchangeDoctrineArray($accessToken->getArrayCopy());
+        $data = $mapper->getOAuth2ArrayCopy();
+
+        return $data;
     }
 
     /* OAuth2\Storage\AccessTokenInterface */

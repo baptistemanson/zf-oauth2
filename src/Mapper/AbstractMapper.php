@@ -15,9 +15,16 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
     protected $objectManager;
 
     /**
-     * @var ObjectManager
+     * Specific config for the current mapper
+     *
+     * @var array
      */
     protected $config;
+
+    /**
+     * Application config for recursive lookups ([user_id])
+     */
+    protected $applicationConfig;
 
     /**
      * @var data
@@ -79,6 +86,18 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
         $this->doctrineData = $data;
 
         return $this;
+    }
+
+    public function setApplicationConfig(array $config)
+    {
+        $this->applicationConfig = $config;
+
+        return $this;
+    }
+
+    public function getApplicationConfig()
+    {
+        return $this->applicationConfig;
     }
 
     /**
@@ -245,8 +264,30 @@ abstract class AbstractMapper implements ObjectManagerAwareInterface
                     }
 
                     if ($relation) {
+                        $applicationConfig = $this->getApplicationConfig();
                         $oAuth2Data[$key] = $oAuth2Value;
                         $doctrineData[$config['mapping'][$key]['name']] = $relation;
+
+                        // Recursively map relation data.  This should handle the user_id
+                        // whenever the client_id is included.
+                        foreach ($applicationConfig['zf-oauth2']['storage_settings']['mapping'] as $mapper => $mapperConfig) {
+                           if ($relation instanceof $mapperConfig['entity']) {
+                                foreach ($mapperConfig['mapping'] as $oAuth2Field => $mapperFieldConfig) {
+                                    if ($mapperFieldConfig['type'] == 'relation') {
+                                        $foundRecursiveMapping = true;
+                                        $doctrineData = $relation->getArrayCopy();
+                                        $recursiveEntity = $doctrineData[$mapperFieldConfig['name']];
+                                        $recursiveEntityData = $recursiveEntity->getArrayCopy();
+
+                                        $oAuth2Data[$oAuth2Field] = $recursiveEntityData[$mapperFieldConfig['entity_field_name']];
+                                        $doctrineData[$mapperFieldConfig['name']] = $recursiveEntity;
+                                    }
+                                }
+                            }
+                        }
+
+
+                        // If the relation entity is the dynamically mapped client entity then
                     } else {
                         $oAuth2Data[$key] = null;
                         $doctrineData[$config['mapping'][$key]['name']] = null;

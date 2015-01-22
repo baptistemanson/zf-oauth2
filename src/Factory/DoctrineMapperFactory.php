@@ -113,6 +113,7 @@ class DoctrineMapperFactory implements AbstractFactoryInterface
         $mapper = new $className();
         $mapper->setObjectManager($objectManager);
         $mapper->setConfig($mappingConfig);
+        $mapper->setApplicationConfig($config);
 
         return $mapper;
     }

@@ -37,7 +37,13 @@ class AccessToken implements ArraySerializableInterface
 
     public function getArrayCopy()
     {
-        throw new \Exception('getArrayCopy not implemented');
+        return array(
+            'id' => $this->getId(),
+            'accessToken' => $this->getAccessToken(),
+            'expires' => $this->getExpires(),
+            'scope' => $this->getScope(),
+            'client' => $this->getClient(),
+        );
     }
 
     public function exchangeArray(array $array)
