@@ -116,7 +116,7 @@
     <association from="PublicKey" to="Client" owner-alias="publicKey" inverse-alias="client" uuid="9daca6d8-8f09-4f97-bbfd-6db05bdf3e58">
       <association-field from="client_id" to="id"/>
     </association>
-    <comment caption="Disconnected User" description="The ZF\OAuth2\Entity\User is not joined to the ZF\OAuth2\Entity\Client so that a dynamic association may be made instead.  This dynamic association creates mapping fields on the user and client and both should have getter and setters for their mapped field names." uuid="664daa50-d4a6-4d82-a35f-5eb5e2e8e7ca"/>
+    <comment caption="Disconnected User" description="The ZF\OAuth2\Entity\User is not joined to the ZF\OAuth2\Entity\Client so that a dynamic association may be made instead thus forging a simple path for a custom User entity.  This dynamic association creates mapping fields on the user and client and both should have getter and setters for their mapped field names." uuid="664daa50-d4a6-4d82-a35f-5eb5e2e8e7ca"/>
     <orm-attributes>
       <attribute name="namespace">ZF\OAuth2\Entity</attribute>
     </orm-attributes>
@@ -129,7 +129,7 @@
     <association uuid="2664c472-a222-4480-80e6-34943b78930f" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
     <association uuid="3efa4b07-67d5-48a1-94e8-69ad2a5bc60e" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
     <association uuid="63fa8d9d-3bcf-461a-afd8-9aefba3c80f7" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
-    <comment uuid="664daa50-d4a6-4d82-a35f-5eb5e2e8e7ca" bg-color="4294967264" position-x="209" position-y="67" size-x="0" size-x2="257" size-y="0" size-y2="81" txt-color="4278190080"/>
+    <comment uuid="664daa50-d4a6-4d82-a35f-5eb5e2e8e7ca" bg-color="4294967264" position-x="177" position-y="62" size-x="0" size-x2="301" size-y="0" size-y2="85" txt-color="4278190080"/>
     <association uuid="6b2ceec2-f65b-4944-be20-613a797e5829" caption1-position-x="0" caption1-position-y="0" center-position-x="0" center-position-y="0" color="4288059030"/>
     <entity uuid="7103834d-0fe7-4345-9f6e-0e5ef1f651a4" bg-color="4294967295" hdr-color="4292006610" position-x="256" position-y="-7" size-x="0" size-x2="94" size-y="0" size-y2="59"/>
     <entity uuid="8c75fc92-0e0a-43ed-b5dc-5859aba057ae" bg-color="4294967295" hdr-color="4292006610" position-x="392" position-y="258" size-x="0" size-x2="106" size-y="0" size-y2="87"/>
