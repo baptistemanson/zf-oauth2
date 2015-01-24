@@ -31,7 +31,7 @@ The endpoints are
 
 There are two clients registerd.
 ```
-user: cilent1
+user: client1
 pass: client1password
 (odd numbered UserAlbums 1, 3, 5)
 
